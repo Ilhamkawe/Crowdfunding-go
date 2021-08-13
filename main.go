@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crowdfunding-TA/auth"
 	"crowdfunding-TA/handler"
 	"crowdfunding-TA/user"
+	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -22,11 +24,14 @@ func main() {
 	userRepository := user.NewRepository(db)
 	// mendeklarasikan service untuk mapping data yang diinputkan menjadi struct user
 	userService := user.NewService(userRepository)
+	// mendeklarasikan service untuk meng generate jwt token
+	authService := auth.NewService()
 	// handler
-	userHandler := handler.NewUserHandler(userService)
+	userHandler := handler.NewUserHandler(userService, authService)
 
-	// test handler
+	// test
 	userService.SaveAvatar(3, "images/avatar1.png")
+	fmt.Println(authService.GenerateToken(1001))
 	// membuat Router
 	router := gin.Default()
 	// grouping API
