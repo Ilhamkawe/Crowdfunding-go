@@ -30,6 +30,24 @@ func main() {
 	userHandler := handler.NewUserHandler(userService, authService)
 
 	// test
+	token, err := authService.ValidateToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMH0.MwlOWX5KQmsDhcpAuINO9b8oXNVI4dvPJ1URiNZ7UIE")
+
+	if err != nil {
+		fmt.Println("Error")
+		fmt.Println("Error")
+		fmt.Println("Error")
+	}
+
+	if token.Valid {
+		fmt.Println("Valid")
+		fmt.Println("Valid")
+		fmt.Println("Valid")
+	} else {
+		fmt.Println("Invalid")
+		fmt.Println("Invalid")
+		fmt.Println("Invalid")
+	}
+
 	userService.SaveAvatar(3, "images/avatar1.png")
 	fmt.Println(authService.GenerateToken(1001))
 	// membuat Router
