@@ -34,7 +34,7 @@ func main() {
 	userHandler := handler.NewUserHandler(userService, authService)
 
 	// test
-	token, err := authService.ValidateToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMH0.MwlOWX5KQmsDhcpAuINO9b8oXNVI4dvPJ1URiNZ7UIE")
+	token, err := authService.ValidateToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMH0.vlUN2r5bK4l7_BMf7jtFgDkWcify5grGLPU2XX2SwDo")
 
 	if err != nil {
 		fmt.Println("Error")
