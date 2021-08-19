@@ -20,7 +20,7 @@ type service struct {
 	repository Repository
 }
 
-// func new service
+// mendeklarasikan service untuk user
 func NewService(repository Repository) *service {
 	return &service{repository}
 }
@@ -50,6 +50,7 @@ func (s *service) RegisterUser(input RegisterInputUser) (User, error) {
 	return newUser, err
 }
 
+// func untuk proses login user
 func (s *service) Login(input LoginInput) (User, error) {
 	email := input.Email
 	password := input.Password
@@ -72,6 +73,7 @@ func (s *service) Login(input LoginInput) (User, error) {
 
 }
 
+// memeriksa apakah email sudah dipakai atau belum
 func (s *service) IsEmailAvailable(input CheckEmailInput) (bool, error) {
 	email := input.Email
 
@@ -105,6 +107,7 @@ func (s *service) SaveAvatar(ID int, fileLocation string) (User, error) {
 	return updatedUser, err
 }
 
+// mengambiil data user berdasarkan UserID
 func (s *service) GetUserByID(ID int) (User, error) {
 	user, err := s.repository.FindById(ID)
 

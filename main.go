@@ -2,6 +2,7 @@ package main
 
 import (
 	"crowdfunding-TA/auth"
+	"crowdfunding-TA/campaign"
 	"crowdfunding-TA/handler"
 	"crowdfunding-TA/helper"
 	"crowdfunding-TA/user"
@@ -24,36 +25,36 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	// mendeklarasikan repository untuk menyimpan data
-	userRepository := user.NewRepository(db)
-	// mendeklarasikan service untuk mapping data yang diinputkan menjadi struct user
-	userService := user.NewService(userRepository)
-	// mendeklarasikan service untuk meng generate jwt token
+
+	// * Middleware
+	// !=================================================================================
 	authService := auth.NewService()
-	// handler
+	// !=================================================================================
+
+	// * user dependencies
+	// !=================================================================================
+	userRepository := user.NewRepository(db)
+	userService := user.NewService(userRepository)
 	userHandler := handler.NewUserHandler(userService, authService)
+	// !=================================================================================
 
-	// test
-	token, err := authService.ValidateToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMH0.vlUN2r5bK4l7_BMf7jtFgDkWcify5grGLPU2XX2SwDo")
+	// * campaign dependencies
+	// !=================================================================================
+	campaignRepository := campaign.NewRepository(db)
+	// campaignService := campaign.NewService(userRepository)
+	// campaignHandler := handler.NewCampaignHandler(campaignService, authService)
+	// !=================================================================================
 
-	if err != nil {
-		fmt.Println("Error")
-		fmt.Println("Error")
-		fmt.Println("Error")
+	// ? test
+	// campaigns, _ := campaignRepository.FindAll()
+	campaigns, _ := campaignRepository.FindByUserID(1)
+
+	for _, campaign := range campaigns {
+		fmt.Println(campaign.Name)
+		if len(campaign.CampaignImages) > 0 {
+			fmt.Println(campaign.CampaignImages[0].FileName)
+		}
 	}
-
-	if token.Valid {
-		fmt.Println("Valid")
-		fmt.Println("Valid")
-		fmt.Println("Valid")
-	} else {
-		fmt.Println("Invalid")
-		fmt.Println("Invalid")
-		fmt.Println("Invalid")
-	}
-
-	userService.SaveAvatar(3, "images/avatar1.png")
-	fmt.Println(authService.GenerateToken(1001))
 	// membuat Router
 	router := gin.Default()
 	// grouping API
