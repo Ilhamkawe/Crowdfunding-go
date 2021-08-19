@@ -21,7 +21,7 @@ func (r *repository) FindAll() ([]Campaign, error) {
 	var campaigns []Campaign
 
 	// select * from campaign
-	err := r.db.Find(&campaigns).Error
+	err := r.db.Preload("CampaignImages", "campaign_images.is_primary = 1").Find(&campaigns).Error
 	if err != nil {
 		return campaigns, err
 	}
