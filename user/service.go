@@ -25,7 +25,7 @@ func NewService(repository Repository) *service {
 	return &service{repository}
 }
 
-// func registerUser
+// fungsi untuk melakukan register user 
 func (s *service) RegisterUser(input RegisterInputUser) (User, error) {
 	user := User{}
 	user.Name = input.Name

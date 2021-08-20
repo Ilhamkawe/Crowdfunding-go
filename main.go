@@ -41,29 +41,26 @@ func main() {
 	// * campaign dependencies
 	// !=================================================================================
 	campaignRepository := campaign.NewRepository(db)
-	// campaignService := campaign.NewService(userRepository)
-	// campaignHandler := handler.NewCampaignHandler(campaignService, authService)
+	campaignService := campaign.NewService(campaignRepository)
+	campaignHandler := handler.NewCampaignHandler(campaignService)
 	// !=================================================================================
 
 	// ? test
-	// campaigns, _ := campaignRepository.FindAll()
-	campaigns, _ := campaignRepository.FindByUserID(1)
 
-	for _, campaign := range campaigns {
-		fmt.Println(campaign.Name)
-		if len(campaign.CampaignImages) > 0 {
-			fmt.Println(campaign.CampaignImages[0].FileName)
-		}
-	}
+	campaigns, _ := campaignService.FindCampaigns(0)
+	fmt.Println("panjang campaigns : ", len(campaigns))
 	// membuat Router
 	router := gin.Default()
 	// grouping API
 	api := router.Group("/api/v1")
+	// POST REQUEST
 	api.POST("/users", userHandler.RegisterUser)
 	api.POST("/session", userHandler.Login)
 	api.POST("/email_chekers", userHandler.CheckEmailAvailability)
 	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)
 
+	// GET REQUEST
+	api.GET("/campaigns", campaignHandler.GetCampaigns)
 	router.Run()
 
 }
