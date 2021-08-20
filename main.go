@@ -52,6 +52,7 @@ func main() {
 	// membuat Router
 	router := gin.Default()
 	// grouping API
+	router.Static("/images", "./images")
 	api := router.Group("/api/v1")
 	// POST REQUEST
 	api.POST("/users", userHandler.RegisterUser)
