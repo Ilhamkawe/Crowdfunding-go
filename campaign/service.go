@@ -1,7 +1,8 @@
 package campaign
 
 type Service interface {
-	FindCampaigns(UserID int) ([]Campaign, error)
+	GetCampaigns(UserID int) ([]Campaign, error)
+	GetCampaignByID(input GetCampaignDetailInput) (Campaign, error)
 }
 
 type service struct {
@@ -13,7 +14,7 @@ func NewService(repository Repository) *service {
 }
 
 //  func yang digunakan untuk mengambil campaign, jika parameter > 0 maka akan menampilkan campaign yang dibuat user tertentu, jika diisi 0 maka akan menampilkan semua campaign
-func (s *service) FindCampaigns(UserID int) ([]Campaign, error) {
+func (s *service) GetCampaigns(UserID int) ([]Campaign, error) {
 	var campaigns []Campaign
 
 	if UserID != 0 {
@@ -31,4 +32,17 @@ func (s *service) FindCampaigns(UserID int) ([]Campaign, error) {
 	}
 
 	return campaigns, nil
+}
+
+func (s *service) GetCampaignByID(input GetCampaignDetailInput) (Campaign, error) {
+	var campaign Campaign
+
+	campaign, err := s.repository.FindByID(input.ID)
+
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, err
+
 }

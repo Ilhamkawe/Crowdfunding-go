@@ -47,7 +47,7 @@ func main() {
 
 	// ? test
 
-	campaigns, _ := campaignService.FindCampaigns(0)
+	campaigns, _ := campaignService.GetCampaigns(0)
 	fmt.Println("panjang campaigns : ", len(campaigns))
 	// membuat Router
 	router := gin.Default()
@@ -62,6 +62,7 @@ func main() {
 
 	// GET REQUEST
 	api.GET("/campaigns", campaignHandler.GetCampaigns)
+	api.GET("/campaigns/:id", campaignHandler.GetCampaign)
 	router.Run()
 
 }
