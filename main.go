@@ -6,7 +6,6 @@ import (
 	"crowdfunding-TA/handler"
 	"crowdfunding-TA/helper"
 	"crowdfunding-TA/user"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -47,20 +46,19 @@ func main() {
 
 	// ? test
 
-	campaigns, _ := campaignService.GetCampaigns(0)
-	fmt.Println("panjang campaigns : ", len(campaigns))
 	// membuat Router
 	router := gin.Default()
 	// grouping API
 	router.Static("/images", "./images")
 	api := router.Group("/api/v1")
-	// POST REQUEST
+	// User Route
 	api.POST("/users", userHandler.RegisterUser)
 	api.POST("/session", userHandler.Login)
 	api.POST("/email_chekers", userHandler.CheckEmailAvailability)
 	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)
 
-	// GET REQUEST
+	// Campaign Route
+	api.POST("/campaigns", authMiddleware(authService, userService), campaignHandler.CreateCampaign)
 	api.GET("/campaigns", campaignHandler.GetCampaigns)
 	api.GET("/campaigns/:id", campaignHandler.GetCampaign)
 	router.Run()
