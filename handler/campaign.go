@@ -4,6 +4,7 @@ import (
 	"crowdfunding-TA/campaign"
 	"crowdfunding-TA/helper"
 	"crowdfunding-TA/user"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -113,14 +114,69 @@ func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
 
 	updatedCampaign, err := h.campaignService.UpdateCampaign(inputID, inputData)
 
+	// fmt.Println("errornya :", err)
+
 	if err != nil {
-		response := helper.APIResponse("Terjadi Kesalahan Saat Mengupdate", http.StatusBadRequest, "error", nil)
+
+		response := helper.APIResponse("Terjadi Kesalahan Saat Mengupdate", http.StatusBadRequest, "error", err.Error())
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
 	response := helper.APIResponse("Berhasil Buat Campaign", http.StatusOK, "sukses", campaign.FormatCampaign(updatedCampaign))
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *campaignHandler) CreateCampaignImage(c *gin.Context) {
+	var input campaign.CreateCampaignImageInput
+
+	err := c.ShouldBind(&input)
+
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Terjadi Kesalahan Saat Update Campaign", http.StatusUnprocessableEntity, "Gagal", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	input.User = currentUser
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		errorMessage := gin.H{"is_uploaded": false}
+
+		response := helper.APIResponse("Terjadi Kesalahan Saat Mengunggah Gambar", http.StatusBadRequest, "Gagal", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	path := fmt.Sprintf("images/%d-%s", currentUser.ID, file.Filename)
+
+	err = c.SaveUploadedFile(file, path)
+	if err != nil {
+		errorMessage := gin.H{"is_uploaded": false}
+
+		response := helper.APIResponse("Terjadi Kesalahan Saat Mengunggah Gambar", http.StatusBadRequest, "Gagal", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	_, err = h.campaignService.SaveCampaignImage(input, path)
+
+	if err != nil {
+		// errorMessage := gin.H{"is_uploaded": false}
+
+		response := helper.APIResponse("Terjadi Kesalahan Saat Mengunggah Gambar", http.StatusBadRequest, "Gagal", err.Error())
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	data := gin.H{"is_uploaded": true}
+	response := helper.APIResponse("Berhasil Mengunggah Gambar", http.StatusBadRequest, "sukses", data)
+	c.JSON(http.StatusBadRequest, response)
 }
 
 // tangkap input kedalam struct
