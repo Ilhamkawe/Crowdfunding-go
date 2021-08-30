@@ -5,6 +5,7 @@ import (
 	"crowdfunding-TA/campaign"
 	"crowdfunding-TA/handler"
 	"crowdfunding-TA/helper"
+	"crowdfunding-TA/transaction"
 	"crowdfunding-TA/user"
 	"log"
 	"net/http"
@@ -44,6 +45,13 @@ func main() {
 	campaignHandler := handler.NewCampaignHandler(campaignService)
 	// !=================================================================================
 
+	// * Transaction dependencies
+	// !=================================================================================
+	transactionRepository := transaction.NewRepository(db)
+	transactionService := transaction.NewService(transactionRepository, campaignRepository)
+	transactionHandler := handler.NewTransactionHandler(transactionService)
+	// !=================================================================================
+
 	// ? test
 
 	// membuat Router
@@ -64,6 +72,8 @@ func main() {
 	api.PUT("/campaigns/:id", authMiddleware(authService, userService), campaignHandler.UpdateCampaign)
 	api.POST("/campaign-image", authMiddleware(authService, userService), campaignHandler.CreateCampaignImage)
 
+	// transaction Route
+	api.GET("/campaigns/:id/transactions", authMiddleware(authService, userService), transactionHandler.GetCampaignTransaction)
 	router.Run()
 
 }
