@@ -61,3 +61,33 @@ func (h *transactionHandler) GetUserTransaction(c *gin.Context) {
 	response := helper.APIResponse("Data Transaksi", http.StatusOK, "Berhasil", transaction.FormatUserTransactions(transactions))
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *transactionHandler) CreateTransaction(c *gin.Context) {
+	var input transaction.CreateTransactionInput
+
+	err := c.ShouldBindJSON(&input)
+
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Gagal Buat Transaksi", http.StatusUnprocessableEntity, "Gagal", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	input.User = currentUser
+
+	newTransaction, err := h.transactionService.CreateTransaction(input)
+
+	if err != nil {
+		response := helper.APIResponse("Gagal Buat Transaksi", http.StatusBadRequest, "Gagal", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Berhasil Buat Transaksi", http.StatusOK, "Sukses", transaction.FormatPaymentTransaction(newTransaction))
+	c.JSON(http.StatusOK, response)
+
+}

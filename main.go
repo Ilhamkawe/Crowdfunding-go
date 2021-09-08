@@ -5,6 +5,7 @@ import (
 	"crowdfunding-TA/campaign"
 	"crowdfunding-TA/handler"
 	"crowdfunding-TA/helper"
+	"crowdfunding-TA/payment"
 	"crowdfunding-TA/transaction"
 	"crowdfunding-TA/user"
 	"log"
@@ -48,7 +49,8 @@ func main() {
 	// * Transaction dependencies
 	// !=================================================================================
 	transactionRepository := transaction.NewRepository(db)
-	transactionService := transaction.NewService(transactionRepository, campaignRepository)
+	paymentService := payment.NewService()
+	transactionService := transaction.NewService(transactionRepository, campaignRepository, paymentService)
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 	// !=================================================================================
 
@@ -75,6 +77,8 @@ func main() {
 	// transaction Route
 	api.GET("/campaigns/:id/transactions", authMiddleware(authService, userService), transactionHandler.GetCampaignTransaction)
 	api.GET("/transactions", authMiddleware(authService, userService), transactionHandler.GetUserTransaction)
+	api.POST("/transactions", authMiddleware(authService, userService), transactionHandler.CreateTransaction)
+
 	router.Run()
 
 }
