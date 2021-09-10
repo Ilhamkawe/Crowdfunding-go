@@ -1,6 +1,8 @@
 package payment
 
 import (
+	"crowdfunding-TA/campaign"
+	// "crowdfunding-TA/transaction"
 	"crowdfunding-TA/user"
 	"strconv"
 
@@ -8,14 +10,17 @@ import (
 )
 
 type service struct {
+	// TransactionRepository transaction.Repository
+	CampaignRepository campaign.Repository
 }
 
 type Service interface {
 	GetPaymentUrl(transaction Transaction, user user.User) (string, error)
+	// ProcessPayment(input transaction.TransactionNotificationInput) error
 }
 
-func NewService() *service {
-	return &service{}
+func NewService(CampaignRepository campaign.Repository) *service {
+	return &service{CampaignRepository}
 }
 
 func (s *service) GetPaymentUrl(transaction Transaction, user user.User) (string, error) {
