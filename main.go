@@ -8,12 +8,15 @@ import (
 	"crowdfunding-TA/payment"
 	"crowdfunding-TA/transaction"
 	"crowdfunding-TA/user"
+	webHandler "crowdfunding-TA/web/handler"
 	"log"
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/multitemplate"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -55,13 +58,25 @@ func main() {
 	transactionHandler := handler.NewTransactionHandler(transactionService)
 	// !=================================================================================
 
+	//  * WebHandler dependencies
+	// !=================================================================================
+	userWebHandler := webHandler.NewUserHandler()
+	// !=================================================================================
+
 	// ? test
 
 	// membuat Router
 	router := gin.Default()
 	router.Use(cors.Default())
-	// grouping API
+	router.LoadHTMLGlob("web/templates/**/*")
+	router.HTMLRender = loadTemplates("./web/templates")
+	// Static Route
+	router.Static("/css", "./web/assets/css")
+	router.Static("/js", "./web/assets/js")
+	router.Static("/vendors", "./web/assets/vendors")
+	router.Static("/web/images", "./web/assets/images")
 	router.Static("/images", "./images")
+	// grouping API
 	api := router.Group("/api/v1")
 	// User Route
 	api.POST("/users", userHandler.RegisterUser)
@@ -81,6 +96,8 @@ func main() {
 	api.GET("/transactions", authMiddleware(authService, userService), transactionHandler.GetUserTransaction)
 	api.POST("/transactions", authMiddleware(authService, userService), transactionHandler.CreateTransaction)
 
+	// CMS Route
+	router.GET("/users", userWebHandler.Index)
 	router.Run()
 
 }
@@ -130,6 +147,31 @@ func authMiddleware(authService auth.Service, userService user.Service) gin.Hand
 
 		c.Set("currentUser", user)
 	}
+}
+
+// ? gin multitemplate
+
+func loadTemplates(templatesDir string) multitemplate.Renderer {
+	r := multitemplate.NewRenderer()
+
+	layouts, err := filepath.Glob(templatesDir + "/layouts/*")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	includes, err := filepath.Glob(templatesDir + "/**/*")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// Generate our templates map from our layouts/ and includes/ directories
+	for _, include := range includes {
+		layoutCopy := make([]string, len(layouts))
+		copy(layoutCopy, layouts)
+		files := append(layoutCopy, include)
+		r.AddFromFiles(filepath.Base(include), files...)
+	}
+	return r
 }
 
 // ambil nilai header Authorization (token saja)

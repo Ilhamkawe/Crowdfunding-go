@@ -198,3 +198,15 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 	c.JSON(http.StatusBadRequest, response)
 
 }
+
+func (h *userHandler) FetchUser(c *gin.Context) {
+
+	currentUser := c.MustGet("currentUser").(user.User)
+
+	formatter := user.FormatUser(currentUser, "")
+
+	response := helper.APIResponse("Berhasil Ambil Data User", http.StatusOK, "success", formatter)
+
+	c.JSON(http.StatusOK, response)
+
+}
