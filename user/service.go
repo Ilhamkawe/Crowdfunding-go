@@ -13,6 +13,8 @@ type Service interface {
 	IsEmailAvailable(input CheckEmailInput) (bool, error)
 	SaveAvatar(ID int, fileLocation string) (User, error)
 	GetUserByID(ID int) (User, error)
+	GetAllUsers() ([]User, error)
+	UpdateUser(input FormUpdateRegister) (User, error)
 }
 
 // Struct service
@@ -30,6 +32,7 @@ func (s *service) RegisterUser(input RegisterInputUser) (User, error) {
 	user := User{}
 	user.Name = input.Name
 	user.Occupation = input.Occupation
+	user.AvatarFileName = "images/default-user.jpg"
 	user.Email = input.Email
 	// enkripsi password yang diinput menggunakan encrypt
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.MinCost)
@@ -120,6 +123,38 @@ func (s *service) GetUserByID(ID int) (User, error) {
 	}
 
 	return user, nil
+}
+
+// mengambil semua data user
+func (s *service) GetAllUsers() ([]User, error) {
+	users, err := s.repository.FindAll()
+
+	if err != nil {
+		return users, err
+	}
+
+	return users, nil
+}
+
+func (s *service) UpdateUser(input FormUpdateRegister) (User, error) {
+	user, err := s.repository.FindById(input.ID)
+
+	if err != nil {
+		return user, err
+	}
+
+	user.Name = input.Name
+	user.Email = input.Email
+	user.Occupation = input.Occupation
+
+	updatedUser, err := s.repository.Update(user)
+
+	if err != nil {
+		return updatedUser, err
+	}
+
+	return updatedUser, err
+
 }
 
 // kegunaan service

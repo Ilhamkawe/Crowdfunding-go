@@ -1,3 +1,50 @@
 {{ define "content" }}
-ini adalah halaman content 
+<div class="content-wrapper">
+    <div class="row">
+        <div class="col-lg-12 grid-margin stretch-card">
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title">Data Pengguna</h4>
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Avatar</th>
+                        <th>Nama</th>
+                        <th>Email</th>
+                        <th>Pekerjaan</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{ range .users }}
+                      <tr>
+                        <td class="py-1">
+                            <img src="{{ .AvatarFileName }}" alt="image"/>
+                          </td>
+                        <td>{{ .Name }}</td>
+                        <td>{{ .Email }}</td>
+                        <td>{{ .Occupation }}</td>
+                        <td>
+                          <a href="/users/{{ .ID }}/edit" class="btn btn-info btn-rounded btn-icon btn-sm">
+                            <i class="mdi mdi-grease-pencil"></i>
+                          </a>
+                          <a href="/users/{{ .ID }}/avatar" class="btn btn-primary btn-rounded btn-icon btn-sm">
+                            <i class="mdi mdi-camera-enhance"></i>
+                          </a>
+                          <button type="button" class="btn btn-danger btn-rounded btn-icon btn-sm">
+                            <i class="mdi mdi-delete"></i>
+                          </button>
+                        </td>
+                      </tr>
+                     {{ end }}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
+</div>
+
 {{ end }}

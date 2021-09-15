@@ -9,6 +9,7 @@ type Repository interface {
 	FindByEmail(email string) (User, error)
 	FindById(ID int) (User, error)
 	Update(user User) (User, error)
+	FindAll() ([]User, error)
 }
 
 type repository struct {
@@ -62,6 +63,19 @@ func (r *repository) FindById(ID int) (User, error) {
 func (r *repository) Update(user User) (User, error) {
 	// update user set user where id = user.id
 	err := r.db.Save(&user).Error
+
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
+}
+
+// mengambil semua data user
+func (r *repository) FindAll() ([]User, error) {
+	var user []User
+	// select * from user
+	err := r.db.Find(&user).Error
 
 	if err != nil {
 		return user, err

@@ -60,7 +60,7 @@ func main() {
 
 	//  * WebHandler dependencies
 	// !=================================================================================
-	userWebHandler := webHandler.NewUserHandler()
+	userWebHandler := webHandler.NewUserHandler(userService)
 	// !=================================================================================
 
 	// ? test
@@ -68,14 +68,14 @@ func main() {
 	// membuat Router
 	router := gin.Default()
 	router.Use(cors.Default())
-	router.LoadHTMLGlob("web/templates/**/*")
+	// router.LoadHTMLGlob("web/templates/**/*")
 	router.HTMLRender = loadTemplates("./web/templates")
 	// Static Route
-	router.Static("/css", "./web/assets/css")
-	router.Static("/js", "./web/assets/js")
-	router.Static("/vendors", "./web/assets/vendors")
-	router.Static("/web/images", "./web/assets/images")
-	router.Static("/images", "./images")
+	router.Static("css", "./web/assets/css")
+	router.Static("js", "./web/assets/js")
+	router.Static("vendors", "./web/assets/vendors")
+	router.Static("web/images", "./web/assets/images")
+	router.Static("images", "./images")
 	// grouping API
 	api := router.Group("/api/v1")
 	// User Route
@@ -98,6 +98,12 @@ func main() {
 
 	// CMS Route
 	router.GET("/users", userWebHandler.Index)
+	router.GET("/users/new", userWebHandler.New)
+	router.POST("/users/new", userWebHandler.Create)
+	router.GET("/users/:id/edit", userWebHandler.Edit)
+	router.POST("/users/:id/update", userWebHandler.Update)
+	router.GET("/users/:id/avatar", userWebHandler.Avatar)
+	router.POST("/users/:id/avatar", userWebHandler.CreateAvatar)
 	router.Run()
 
 }

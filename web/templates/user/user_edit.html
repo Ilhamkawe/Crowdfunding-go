@@ -1,0 +1,33 @@
+{{ define "content" }}
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Update Data User ID : {{ .users.ID }}</h4>
+                    {{ if .error }}
+                    <div class="alert alert-danger" role="alert">
+                      Terjadi Kesalahan Saat Mengubah User
+                    </div>
+                    {{ end }}
+                    <form class="forms-sample" method="POST" action="/users/{{ .users.ID }}/update">
+                      <div class="form-group">
+                        <label for="exampleInputName1">Nama</label>
+                        <input type="text" class="form-control" id="exampleInputName1" required placeholder="Name" name="name" value="{{ .users.Name }}">
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputEmail3">Email</label>
+                        <input type="email" class="form-control" id="exampleInputEmail3" required placeholder="Email" name="email" value="{{ .users.Email }}">
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputEmail3">Pekerjaan</label>
+                        <input type="text" class="form-control" id="exampleInputEmail3" required placeholder="Email" name="occupation" value="{{ .users.Occupation }}">
+                      </div>
+                      <button type="submit" class="btn btn-primary me-2">Submit</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+        </div>
+    </div>
+{{ end }}
