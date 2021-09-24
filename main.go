@@ -61,6 +61,8 @@ func main() {
 	//  * WebHandler dependencies
 	// !=================================================================================
 	userWebHandler := webHandler.NewUserHandler(userService)
+	campaignWebHandler := webHandler.NewCampaignHandler(campaignService, userService)
+	transactionWebHandler := webHandler.NewTransactionHandler(transactionService)
 	// !=================================================================================
 
 	// ? test
@@ -104,6 +106,15 @@ func main() {
 	router.POST("/users/:id/update", userWebHandler.Update)
 	router.GET("/users/:id/avatar", userWebHandler.Avatar)
 	router.POST("/users/:id/avatar", userWebHandler.CreateAvatar)
+	router.GET("/campaigns", campaignWebHandler.Index)
+	router.GET("/campaign/new", campaignWebHandler.New)
+	router.POST("/campaign/new", campaignWebHandler.Create)
+	router.GET("/campaign/:id/images", campaignWebHandler.Image)
+	router.POST("/campaign/:id/images", campaignWebHandler.CreateImage)
+	router.GET("/campaign/:id/edit", campaignWebHandler.Edit)
+	router.POST("/campaign/:id/edit", campaignWebHandler.Update)
+	router.GET("/campaign/:id/show", campaignWebHandler.Detail)
+	router.GET("/transactions", transactionWebHandler.Index)
 	router.Run()
 
 }

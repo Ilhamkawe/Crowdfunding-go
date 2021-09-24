@@ -8,6 +8,7 @@ type Repository interface {
 	GetByID(ID int) (Transaction, error)
 	Save(transaction Transaction) (Transaction, error)
 	Update(transaction Transaction) (Transaction, error)
+	FindAll() ([]Transaction, error)
 }
 
 type repository struct {
@@ -69,4 +70,18 @@ func (r *repository) Update(transaction Transaction) (Transaction, error) {
 	}
 
 	return transaction, nil
+}
+
+func (r *repository) FindAll() ([]Transaction, error) {
+
+	var transaction []Transaction
+
+	err := r.db.Preload("Campaign").Find(&transaction).Error
+
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, err
+
 }

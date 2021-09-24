@@ -1,0 +1,39 @@
+{{ define "content" }}
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Buat Data Kampanye Baru</h4>
+                    <form class="forms-sample" method="POST" action="/campaign/{{ .campaign.ID }}/edit">
+                      <div class="form-group">
+                        <label for="exampleInputEmail3">Nama Kampanye</label>
+                        <input type="text" class="form-control" id="exampleInputEmail3" required placeholder="Nama Kampanye" name="name" value="{{ .campaign.Name }}">
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputEmail3">Deskripsi Pendek</label>
+                        <input type="text" class="form-control" id="exampleInputEmail3" required placeholder="Deksripsi Singkat" name="short_description" value="{{ .campaign.ShortDescription }}">
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleTextarea1">Deskripsi</label>
+                        <textarea class="form-control form-control-lg" id="exampleTextarea1" rows="10" required name="description">{{ .campaign.Description }}</textarea>
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputPassword4">Jumlah Tujuan</label>
+                        <input type="number" class="form-control" id="exampleInputPassword4" required placeholder="Jumlah Tujuan" name="goal_amount" value="{{ .campaign.GoalAmount }}">
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputPassword4">Keuntungan</label>
+                        <input type="text" class="form-control" id="exampleInputPassword4" required placeholder="Keuntungan" name="perks" value="{{ .campaign.Perks }}">
+                        <p style="color:#666666c4">gunakan tanda koma "," untuk tanda pisah. contoh : perks1,perks2,perks3</p>
+                      </div>
+                      
+                      <button type="submit" class="btn btn-primary me-2">Submit</button>
+                      <!-- <button class="btn btn-light">Cancel</button> -->
+                    </form>
+                  </div>
+                </div>
+              </div>
+        </div>
+    </div>
+{{ end }}

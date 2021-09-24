@@ -4,7 +4,7 @@
             <div class="col-12 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">
-                    <h4 class="card-title">Buat Data User Baru</h4>
+                    <h4 class="card-title">Buat Data Pengguna Baru</h4>
                     {{ if .error }}
                     <div class="alert alert-danger" role="alert">
                       Terjadi Kesalahan Saat Menambahkan User
@@ -13,7 +13,7 @@
                     <form class="forms-sample" method="POST" action="/users/new">
                       <div class="form-group">
                         <label for="exampleInputName1">Nama</label>
-                        <input type="text" class="form-control" id="exampleInputName1" required placeholder="Name" name="name" value="{{ .input.Name }}">
+                        <input type="text" class="form-control" id="exampleInputName1" required placeholder="Nama" name="name" value="{{ .input.Name }}">
                       </div>
                       <div class="form-group">
                         <label for="exampleInputEmail3">Email</label>
@@ -21,11 +21,11 @@
                       </div>
                       <div class="form-group">
                         <label for="exampleInputEmail3">Pekerjaan</label>
-                        <input type="text" class="form-control" id="exampleInputEmail3" required placeholder="Email" name="occupation" value="{{ .input.Occupation }}">
+                        <input type="text" class="form-control" id="exampleInputEmail3" required placeholder="Pekerjaan" name="occupation" value="{{ .input.Occupation }}">
                       </div>
                       <div class="form-group">
-                        <label for="exampleInputPassword4">Password</label>
-                        <input type="password" class="form-control" id="exampleInputPassword4" required placeholder="Password" name="password">
+                        <label for="exampleInputPassword4">Kata Sandi</label>
+                        <input type="password" class="form-control" id="exampleInputPassword4" required placeholder="Kata Sandi" name="password">
                       </div>
                       
                       <button type="submit" class="btn btn-primary me-2">Submit</button>

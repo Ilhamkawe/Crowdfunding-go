@@ -11,6 +11,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gosimple/slug v1.10.0 // indirect
 	github.com/json-iterator/go v1.1.11 // indirect
+	github.com/leekchan/accounting v1.0.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-isatty v0.0.13 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

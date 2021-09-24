@@ -1,0 +1,42 @@
+{{ define "content" }}
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Buat Data Kampanye Baru</h4>
+                    <form class="forms-sample" method="POST" action="/campaign/{{ .campaign.ID }}/edit">
+                      <div class="form-group">
+                        <label for="exampleInputEmail3">Pengguna</label>
+                        <input type="text" class="form-control" id="exampleInputEmail3" required placeholder="Pengguna" name="user" value="{{ .campaign.User.Name }}" disabled>
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputEmail3">Nama Kampanye</label>
+                        <input type="text" class="form-control" id="exampleInputEmail3" required placeholder="Nama Kampanye" name="name" value="{{ .campaign.Name }}" disabled>
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputEmail3">Deskripsi Pendek</label>
+                        <input type="text" class="form-control" id="exampleInputEmail3" required placeholder="Deksripsi Singkat" name="short_description" value="{{ .campaign.ShortDescription }}" disabled>
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleTextarea1">Deskripsi</label>
+                        <textarea class="form-control form-control-lg" id="exampleTextarea1" rows="10" required name="description" disabled>{{ .campaign.Description }}</textarea>
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputPassword4">Jumlah Tujuan</label>
+                        <input type="text" class="form-control" id="exampleInputPassword4" required placeholder="Jumlah Tujuan" name="goal_amount" value="{{  .campaign.GoalAmountFormatIDR }}" disabled>
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputPassword4">Keuntungan</label>
+                        <input type="text" class="form-control" id="exampleInputPassword4" required placeholder="Keuntungan" name="perks" value="{{ .campaign.Perks }}" disabled>
+                      </div>
+                      
+                      <button type="submit" class="btn btn-primary me-2">Submit</button>
+                      <!-- <button class="btn btn-light">Cancel</button> -->
+                    </form>
+                  </div>
+                </div>
+              </div>
+        </div>
+    </div>
+{{ end }}
