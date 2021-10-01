@@ -4,19 +4,18 @@ import (
 	"crowdfunding-TA/auth"
 	"crowdfunding-TA/campaign"
 	"crowdfunding-TA/handler"
-	"crowdfunding-TA/helper"
+	"crowdfunding-TA/middleware"
 	"crowdfunding-TA/payment"
 	"crowdfunding-TA/transaction"
 	"crowdfunding-TA/user"
 	webHandler "crowdfunding-TA/web/handler"
 	"log"
-	"net/http"
 	"path/filepath"
-	"strings"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/multitemplate"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -63,12 +62,15 @@ func main() {
 	userWebHandler := webHandler.NewUserHandler(userService)
 	campaignWebHandler := webHandler.NewCampaignHandler(campaignService, userService)
 	transactionWebHandler := webHandler.NewTransactionHandler(transactionService)
+	sessionWebHandler := webHandler.NewSessionHandler(userService)
 	// !=================================================================================
 
 	// ? test
 
 	// membuat Router
 	router := gin.Default()
+	cookieStore := cookie.NewStore(auth.SECRET_KEY)
+	router.Use(sessions.Sessions("userID", cookieStore))
 	router.Use(cors.Default())
 	// router.LoadHTMLGlob("web/templates/**/*")
 	router.HTMLRender = loadTemplates("./web/templates")
@@ -84,86 +86,42 @@ func main() {
 	api.POST("/users", userHandler.RegisterUser)
 	api.POST("/session", userHandler.Login)
 	api.POST("/email_chekers", userHandler.CheckEmailAvailability)
-	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)
+	api.POST("/avatars", middleware.AuthMiddleware(authService, userService), userHandler.UploadAvatar)
 
 	// Campaign Route
-	api.POST("/campaigns", authMiddleware(authService, userService), campaignHandler.CreateCampaign)
 	api.GET("/campaigns", campaignHandler.GetCampaigns)
 	api.GET("/campaigns/:id", campaignHandler.GetCampaign)
-	api.PUT("/campaigns/:id", authMiddleware(authService, userService), campaignHandler.UpdateCampaign)
-	api.POST("/campaign-image", authMiddleware(authService, userService), campaignHandler.CreateCampaignImage)
+	api.POST("/campaigns", middleware.AuthMiddleware(authService, userService), campaignHandler.CreateCampaign)
+	api.PUT("/campaigns/:id", middleware.AuthMiddleware(authService, userService), campaignHandler.UpdateCampaign)
+	api.POST("/campaign-image", middleware.AuthMiddleware(authService, userService), campaignHandler.CreateCampaignImage)
 
 	// transaction Route
-	api.GET("/campaigns/:id/transactions", authMiddleware(authService, userService), transactionHandler.GetCampaignTransaction)
-	api.GET("/transactions", authMiddleware(authService, userService), transactionHandler.GetUserTransaction)
-	api.POST("/transactions", authMiddleware(authService, userService), transactionHandler.CreateTransaction)
+	api.GET("/campaigns/:id/transactions", middleware.AuthMiddleware(authService, userService), transactionHandler.GetCampaignTransaction)
+	api.GET("/transactions", middleware.AuthMiddleware(authService, userService), transactionHandler.GetUserTransaction)
+	api.POST("/transactions", middleware.AuthMiddleware(authService, userService), transactionHandler.CreateTransaction)
 
 	// CMS Route
-	router.GET("/users", userWebHandler.Index)
-	router.GET("/users/new", userWebHandler.New)
-	router.POST("/users/new", userWebHandler.Create)
-	router.GET("/users/:id/edit", userWebHandler.Edit)
-	router.POST("/users/:id/update", userWebHandler.Update)
-	router.GET("/users/:id/avatar", userWebHandler.Avatar)
-	router.POST("/users/:id/avatar", userWebHandler.CreateAvatar)
-	router.GET("/campaigns", campaignWebHandler.Index)
-	router.GET("/campaign/new", campaignWebHandler.New)
-	router.POST("/campaign/new", campaignWebHandler.Create)
-	router.GET("/campaign/:id/images", campaignWebHandler.Image)
-	router.POST("/campaign/:id/images", campaignWebHandler.CreateImage)
-	router.GET("/campaign/:id/edit", campaignWebHandler.Edit)
-	router.POST("/campaign/:id/edit", campaignWebHandler.Update)
-	router.GET("/campaign/:id/show", campaignWebHandler.Detail)
-	router.GET("/transactions", transactionWebHandler.Index)
+	router.GET("/users", middleware.AdminMiddleware(), userWebHandler.Index)
+	router.GET("/users/new", middleware.AdminMiddleware(), userWebHandler.New)
+	router.POST("/users/new", middleware.AdminMiddleware(), userWebHandler.Create)
+	router.GET("/users/:id/edit", middleware.AdminMiddleware(), userWebHandler.Edit)
+	router.POST("/users/:id/update", middleware.AdminMiddleware(), userWebHandler.Update)
+	router.GET("/users/:id/avatar", middleware.AdminMiddleware(), userWebHandler.Avatar)
+	router.POST("/users/:id/avatar", middleware.AdminMiddleware(), userWebHandler.CreateAvatar)
+	router.GET("/campaigns", middleware.AdminMiddleware(), campaignWebHandler.Index)
+	router.GET("/campaign/new", middleware.AdminMiddleware(), campaignWebHandler.New)
+	router.POST("/campaign/new", middleware.AdminMiddleware(), campaignWebHandler.Create)
+	router.GET("/campaign/:id/images", middleware.AdminMiddleware(), campaignWebHandler.Image)
+	router.POST("/campaign/:id/images", middleware.AdminMiddleware(), campaignWebHandler.CreateImage)
+	router.GET("/campaign/:id/edit", middleware.AdminMiddleware(), campaignWebHandler.Edit)
+	router.POST("/campaign/:id/edit", middleware.AdminMiddleware(), campaignWebHandler.Update)
+	router.GET("/campaign/:id/show", middleware.AdminMiddleware(), campaignWebHandler.Detail)
+	router.GET("/transactions", middleware.AdminMiddleware(), transactionWebHandler.Index)
+	router.GET("/login", sessionWebHandler.Index)
+	router.POST("/login", sessionWebHandler.Login)
+	router.GET("/logout", sessionWebHandler.Logout)
 	router.Run()
 
-}
-
-// ? Middleware
-func authMiddleware(authService auth.Service, userService user.Service) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-
-		if !strings.Contains(authHeader, "Bearer") {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		// Bearer Token
-		tokenString := ""
-		arrayToken := strings.Split(authHeader, " ")
-
-		if len(arrayToken) == 2 {
-			tokenString = arrayToken[1]
-		}
-
-		token, err := authService.ValidateToken(tokenString)
-		if err != nil {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		claim, ok := token.Claims.(jwt.MapClaims)
-		if !ok || !token.Valid {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		userID := int(claim["user_id"].(float64))
-
-		user, err := userService.GetUserByID(userID)
-
-		if err != nil {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		c.Set("currentUser", user)
-	}
 }
 
 // ? gin multitemplate
@@ -181,11 +139,12 @@ func loadTemplates(templatesDir string) multitemplate.Renderer {
 		panic(err.Error())
 	}
 
-	// Generate our templates map from our layouts/ and includes/ directories
+	// Generate our templates map from our layouts/
 	for _, include := range includes {
 		layoutCopy := make([]string, len(layouts))
 		copy(layoutCopy, layouts)
-		files := append(layoutCopy, include)
+		files := append(layoutCopy, include, "web/templates/partial/partial.html")
+		// fmt.Println(files)
 		r.AddFromFiles(filepath.Base(include), files...)
 	}
 	return r
