@@ -60,6 +60,40 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *userHandler) UpdateUserInfo(c *gin.Context) {
+	var input user.UpdateInfoUserInput
+
+	err := c.ShouldBindJSON(&input)
+
+	if err != nil {
+
+		errors := helper.FormatValidationError(err)
+
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Gagal Update Info akun", http.StatusUnprocessableEntity, "gagal", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	// ini diisi jwt
+	currentUser := c.MustGet("currentUser").(user.User)
+	userID := currentUser.ID
+
+	_, err = h.userService.UpdateUserInfo(userID, input)
+	if err != nil {
+		data := gin.H{"updated": false}
+		response := helper.APIResponse("Terjadi kesalahan saat ngubah info akun", http.StatusBadRequest, "Gagal", data)
+
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	data := gin.H{"updated": true}
+	response := helper.APIResponse("berhasil mengubah info akun", http.StatusOK, "Berhasil", data)
+	c.JSON(http.StatusOK, response)
+
+}
+
 func (h *userHandler) Login(c *gin.Context) {
 	// user input email dan password
 	// input dintangkap handler
@@ -195,7 +229,7 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 
 	data := gin.H{"is_uploaded": true}
 	response := helper.APIResponse("Terjadi kesalahan saat mengunggah avatar", http.StatusOK, "Berhasil", data)
-	c.JSON(http.StatusBadRequest, response)
+	c.JSON(http.StatusOK, response)
 
 }
 

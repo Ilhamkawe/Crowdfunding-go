@@ -13,15 +13,18 @@ type Campaign struct {
 	Name             string
 	ShortDescription string
 	Description      string
-	Perks            string
 	BackerCount      int
 	GoalAmount       int
+	Cattegory        string
 	CurrentAmount    int
 	Slug             string
+	Status           string
+	Attachment       string
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 	User             user.User
 	CampaignImages   []CampaignImage
+	CampaignRewards  []CampaignReward
 }
 
 func (c Campaign) GoalAmountFormatIDR() string {
@@ -36,4 +39,14 @@ type CampaignImage struct {
 	IsPrimary  int
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
+}
+
+type CampaignReward struct {
+	ID          int
+	CampaignID  int
+	Description string
+	Perks       string
+	MinDonate   int
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }

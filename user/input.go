@@ -13,7 +13,12 @@ type LoginInput struct {
 }
 
 type CheckEmailInput struct {
-	Email string `json:"email" bindung:"required,email"`
+	Email string `json:"email" binding:"required,email"`
+}
+
+type UpdateInfoUserInput struct {
+	Name       string `json:"name" binding:"required"`
+	Occupation string `json:"occupation" binding:"required"`
 }
 
 type FormInputRegister struct {

@@ -11,6 +11,8 @@ import (
 type Transaction struct {
 	ID         int
 	CampaignID int
+	RewardID   int
+	Email      string
 	UserID     int
 	Amount     int
 	Status     string

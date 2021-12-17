@@ -24,8 +24,8 @@
                           <tr>
                             <th>Image</th>
                             <th>Nama</th>
-                            <th>Deskripsi Singkat</th>
                             <th>Jumlah Tujuan</th>
+                            <th>Status</th>
                             <th>Aksi</th>
                           </tr>
                         </thead>
@@ -41,10 +41,10 @@
                                   <a href="/campaign/{{ .ID }}/show">{{ .Name }}</a>
                               </td>
                               <td>
-                                  {{ .ShortDescription }}
+                                  {{ .GoalAmountFormatIDR }}
                               </td>
                               <td>
-                                  {{ .GoalAmountFormatIDR }}
+                                  {{ .Status }}
                               </td>
                               <td>
                                 <a href="/campaign/{{ .ID }}/edit" class="btn btn-info btn-rounded btn-icon btn-sm">

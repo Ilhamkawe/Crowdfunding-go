@@ -29,16 +29,25 @@
                         <input type="text" class="form-control" id="exampleInputEmail3" required placeholder="Deksripsi Singkat" name="short_description" value="{{ .campaign.ShortDescription }}" disabled>
                       </div>
                       <div class="form-group">
-                        <label for="exampleTextarea1">Deskripsi</label>
-                        <textarea class="form-control form-control-lg" id="exampleTextarea1" rows="10" required name="description" disabled>{{ .campaign.Description }}</textarea>
+                        <label for="exampleTextarea1">Lampiran</label>
+                        <br>
+                        <a href="/{{ .campaign.Attachment }}">Download Lampiran</a>
                       </div>
+                      
+                      
                       <div class="form-group">
                         <label for="exampleInputPassword4">Jumlah Tujuan</label>
                         <input type="text" class="form-control" id="exampleInputPassword4" required placeholder="Jumlah Tujuan" name="goal_amount" value="{{  .campaign.GoalAmountFormatIDR }}" disabled>
                       </div>
                       <div class="form-group">
-                        <label for="exampleInputPassword4">Keuntungan</label>
-                        <input type="text" class="form-control" id="exampleInputPassword4" required placeholder="Keuntungan" name="perks" value="{{ .campaign.Perks }}" disabled>
+                        <label for="exampleInputPassword4">Aksi</label><br>
+                        {{ if .status}}
+                        <a href="/campaign/{{ .campaign.ID }}/Pending"  class="btn btn-warning me-2">Pending</a>
+                        <a href="/campaign/{{ .campaign.ID }}/Tertolak"  class="btn btn-danger me-2">Tolak</a>
+                        {{ else }}
+                        <a href="/campaign/{{ .campaign.ID }}/Berjalan"  class="btn btn-success me-2">Approve</a>
+                        <a href="/campaign/{{ .campaign.ID }}/Tertolak"  class="btn btn-danger me-2">Tolak</a>
+                        {{ end }}
                       </div>
                       
                       <button type="submit" class="btn btn-primary me-2">Submit</button>

@@ -15,6 +15,7 @@ type Service interface {
 	GetUserByID(ID int) (User, error)
 	GetAllUsers() ([]User, error)
 	UpdateUser(input FormUpdateRegister) (User, error)
+	UpdateUserInfo(ID int, input UpdateInfoUserInput) (User, error)
 }
 
 // Struct service
@@ -101,6 +102,23 @@ func (s *service) SaveAvatar(ID int, fileLocation string) (User, error) {
 	}
 
 	user.AvatarFileName = fileLocation
+
+	updatedUser, err := s.repository.Update(user)
+	if err != nil {
+		return updatedUser, err
+	}
+
+	return updatedUser, err
+}
+
+func (s *service) UpdateUserInfo(ID int, input UpdateInfoUserInput) (User, error) {
+	user, err := s.repository.FindById(ID)
+	if err != nil {
+		return user, err
+	}
+
+	user.Name = input.Name
+	user.Occupation = input.Occupation
 
 	updatedUser, err := s.repository.Update(user)
 	if err != nil {

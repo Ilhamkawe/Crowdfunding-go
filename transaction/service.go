@@ -3,6 +3,7 @@ package transaction
 import (
 	"crowdfunding-TA/campaign"
 	"crowdfunding-TA/payment"
+	"fmt"
 	"strconv"
 
 	// "crowdfunding-TA/payment"
@@ -64,7 +65,9 @@ func (s *service) CreateTransaction(input CreateTransactionInput) (Transaction, 
 	transaction.CampaignID = input.CampaignID
 	transaction.Amount = input.Amount
 	transaction.UserID = input.User.ID
+	transaction.Email = input.Email
 	transaction.Status = "Pending"
+	transaction.RewardID = input.RewardID
 
 	newTransaction, err := s.repository.Save(transaction)
 	if err != nil {
@@ -77,7 +80,7 @@ func (s *service) CreateTransaction(input CreateTransactionInput) (Transaction, 
 	}
 
 	paymentUrl, err := s.paymentService.GetPaymentUrl(paymentTransaction, input.User)
-
+	fmt.Println(err)
 	if err != nil {
 		return newTransaction, nil
 	}

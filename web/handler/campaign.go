@@ -20,7 +20,7 @@ func NewCampaignHandler(campaignService campaign.Service, userService user.Servi
 }
 
 func (h *campaignHandler) Index(c *gin.Context) {
-	campaigns, err := h.campaignService.GetCampaigns(0)
+	campaigns, err := h.campaignService.GetAllCampaign()
 	if err != nil {
 		c.HTML(http.StatusOK, "error.html", nil)
 		return
@@ -67,7 +67,6 @@ func (h *campaignHandler) Create(c *gin.Context) {
 	createCampaignInput.ShortDescription = input.ShortDescription
 	createCampaignInput.Description = input.Description
 	createCampaignInput.GoalAmount = input.GoalAmount
-	createCampaignInput.Perks = input.Perks
 	createCampaignInput.User = user
 
 	_, err = h.campaignService.CreateCampaign(createCampaignInput)
@@ -167,6 +166,23 @@ func (h *campaignHandler) Edit(c *gin.Context) {
 
 }
 
+func (h *campaignHandler) ChangeStatus(c *gin.Context) {
+	idParams := c.Param("id")
+	id, _ := strconv.Atoi(idParams)
+
+	status := c.Param("status")
+
+	_, err := h.campaignService.ChangeStatus(status, id)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
+			"error": err,
+		})
+		return
+	}
+	path := fmt.Sprintf("/campaign/%d/show", id)
+	c.Redirect(http.StatusFound, path)
+}
+
 func (h *campaignHandler) Update(c *gin.Context) {
 	idParams := c.Param("id")
 	id, _ := strconv.Atoi(idParams)
@@ -200,9 +216,8 @@ func (h *campaignHandler) Update(c *gin.Context) {
 		return
 	}
 
-	updateInput := campaign.CreateCampaignInput{}
+	updateInput := campaign.UpdateCampaignInput{}
 	updateInput.Name = input.Name
-	updateInput.Perks = input.Perks
 	updateInput.Description = input.Description
 	updateInput.ShortDescription = input.ShortDescription
 	updateInput.User = userCampaign
@@ -223,7 +238,7 @@ func (h *campaignHandler) Detail(c *gin.Context) {
 	idParams := c.Param("id")
 	id, _ := strconv.Atoi(idParams)
 
-	campaign, err := h.campaignService.GetCampaignByID(campaign.GetCampaignDetailInput{ID: id})
+	campaign, err := h.campaignService.GetCampaignByIDWoStatus(id)
 	if err != nil {
 		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
 			"error": err,
@@ -231,8 +246,17 @@ func (h *campaignHandler) Detail(c *gin.Context) {
 		return
 	}
 
+	var Status bool
+
+	if campaign.Status == "Berjalan" {
+		Status = true
+	} else {
+		Status = false
+	}
+
 	c.HTML(http.StatusFound, "campaign_detail.html", gin.H{
 		"campaign": campaign,
+		"status":   Status,
 	})
 
 }

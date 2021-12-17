@@ -69,9 +69,15 @@ func main() {
 
 	// membuat Router
 	router := gin.Default()
+	router.Use(cors.Default())
+	router.Use(cors.New(
+		cors.Config{
+			AllowOrigins: []string{"http://localhost:3000"},
+			AllowMethods: []string{"POST", "GET", "PATCH", "DELETE", "HEAD"},
+			AllowHeaders: []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		}))
 	cookieStore := cookie.NewStore(auth.SECRET_KEY)
 	router.Use(sessions.Sessions("userID", cookieStore))
-	router.Use(cors.Default())
 	// router.LoadHTMLGlob("web/templates/**/*")
 	router.HTMLRender = loadTemplates("./web/templates")
 	// Static Route
@@ -80,6 +86,7 @@ func main() {
 	router.Static("vendors", "./web/assets/vendors")
 	router.Static("web/images", "./web/assets/images")
 	router.Static("images", "./images")
+	router.Static("attachment", "./attachment")
 	// grouping API
 	api := router.Group("/api/v1")
 	// User Route
@@ -87,13 +94,23 @@ func main() {
 	api.POST("/session", userHandler.Login)
 	api.POST("/email_chekers", userHandler.CheckEmailAvailability)
 	api.POST("/avatars", middleware.AuthMiddleware(authService, userService), userHandler.UploadAvatar)
+	api.PUT("/users/update", middleware.AuthMiddleware(authService, userService), userHandler.UpdateUserInfo)
+	api.GET("/users/fetch", middleware.AuthMiddleware(authService, userService), userHandler.FetchUser)
 
 	// Campaign Route
 	api.GET("/campaigns", campaignHandler.GetCampaigns)
 	api.GET("/campaigns/:id", campaignHandler.GetCampaign)
+	api.GET("/campaigns/L/:limit", campaignHandler.Limit)
+	api.GET("/campaigns/R/:id", campaignHandler.GetRewards)
+	api.GET("/campaign/:id/user", middleware.AuthMiddleware(authService, userService), campaignHandler.GetUserCampaignByID)
 	api.POST("/campaigns", middleware.AuthMiddleware(authService, userService), campaignHandler.CreateCampaign)
+	api.PUT("/campaigns/attachment", middleware.AuthMiddleware(authService, userService), campaignHandler.UpdateAttachment)
 	api.PUT("/campaigns/:id", middleware.AuthMiddleware(authService, userService), campaignHandler.UpdateCampaign)
 	api.POST("/campaign-image", middleware.AuthMiddleware(authService, userService), campaignHandler.CreateCampaignImage)
+	api.POST("/campaign-reward", middleware.AuthMiddleware(authService, userService), campaignHandler.CreateCampaignReward)
+	api.POST("/campaign-reward/delete", middleware.AuthMiddleware(authService, userService), campaignHandler.DeleteReward)
+	api.DELETE("/campaign-image", middleware.AuthMiddleware(authService, userService), campaignHandler.DeleteImage)
+	api.POST("/campaign/search", campaignHandler.SearchCampaign)
 
 	// transaction Route
 	api.GET("/campaigns/:id/transactions", middleware.AuthMiddleware(authService, userService), transactionHandler.GetCampaignTransaction)
@@ -116,6 +133,7 @@ func main() {
 	router.GET("/campaign/:id/edit", middleware.AdminMiddleware(), campaignWebHandler.Edit)
 	router.POST("/campaign/:id/edit", middleware.AdminMiddleware(), campaignWebHandler.Update)
 	router.GET("/campaign/:id/show", middleware.AdminMiddleware(), campaignWebHandler.Detail)
+	router.GET("/campaign/:id/:status", middleware.AdminMiddleware(), campaignWebHandler.ChangeStatus)
 	router.GET("/transactions", middleware.AdminMiddleware(), transactionWebHandler.Index)
 	router.GET("/login", sessionWebHandler.Index)
 	router.POST("/login", sessionWebHandler.Login)

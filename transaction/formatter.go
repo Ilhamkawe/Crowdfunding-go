@@ -1,22 +1,24 @@
 package transaction
 
 import (
+	"crowdfunding-TA/user"
 	"time"
 )
 
 type CampaignTransactionFormatter struct {
 	ID        int       `json:"id"`
-	Name      string    `json:"name"`
 	Amount    int       `json:"amount"`
 	CreatedAt time.Time `json:"created_at"`
+	User      user.User
 }
 
 func FormatTransaction(transaction Transaction) CampaignTransactionFormatter {
 	formatter := CampaignTransactionFormatter{}
 	formatter.ID = transaction.ID
-	formatter.Name = transaction.User.Name
 	formatter.Amount = transaction.Amount
 	formatter.CreatedAt = transaction.CreatedAt
+	formatter.User = transaction.User
+
 	return formatter
 }
 

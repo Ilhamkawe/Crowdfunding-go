@@ -8,8 +8,10 @@ type GetCampaignTransactionInput struct {
 }
 
 type CreateTransactionInput struct {
-	Amount     int `json:"amount" binding:"required"`
-	CampaignID int `json:"campaign_id" binding:"required"`
+	Amount     int    `json:"amount" binding:"required"`
+	CampaignID int    `json:"campaign_id" binding:"required"`
+	Email      string `json:"email"`
+	RewardID   int    `json:"reward_id"`
 	User       user.User
 }
 
