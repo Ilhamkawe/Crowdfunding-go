@@ -41,6 +41,33 @@ func (h *campaignHandler) GetRewards(c *gin.Context) {
 
 }
 
+func (h *campaignHandler) SearchCampaignPaginate(c *gin.Context) {
+	var input campaign.SearchCampaignPaginate
+	page, _ := strconv.Atoi(c.Query("page"))
+	input.ActivePage = page
+	err := c.ShouldBindJSON(&input)
+
+	fmt.Println(input)
+
+	if err != nil {
+		response := helper.APIResponse("Terjadi Kesalahan Input", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		fmt.Print(err)
+		return
+	}
+
+	campaigns, err := h.campaignService.SearchCampaignPaginate(input)
+
+	if err != nil {
+		response := helper.APIResponse("Terjadi Kesalahan Saat Mencari Data", http.StatusBadRequest, "error", err.Error())
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Berhasil Mengambil Data", http.StatusOK, "Berhasil", campaigns)
+	c.JSON(http.StatusOK, response)
+}
+
 func (h *campaignHandler) SearchCampaign(c *gin.Context) {
 	var input campaign.SearchCampaignInput
 	err := c.ShouldBindJSON(&input)
@@ -57,7 +84,7 @@ func (h *campaignHandler) SearchCampaign(c *gin.Context) {
 	campaigns, err := h.campaignService.SearchCampaign(input)
 
 	if err != nil {
-		response := helper.APIResponse("Terjadi Kesalahan Saat Mencari Data", http.StatusBadRequest, "error", nil)
+		response := helper.APIResponse("Terjadi Kesalahan Saat Mencari Data", http.StatusBadRequest, "error", err.Error())
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
@@ -431,6 +458,313 @@ func (h *campaignHandler) DeleteImage(c *gin.Context) {
 
 	response := helper.APIResponse("Berhasil Menghapus Reward", http.StatusOK, "sukses", isDeleted)
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *campaignHandler) CreateActivity(c *gin.Context) {
+	var input campaign.CreateCampaignActivityInput
+
+	err := c.ShouldBind(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Gagal Buat Activity", http.StatusUnprocessableEntity, "gagal", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+
+	input.User = currentUser
+	fmt.Println(input)
+	//! upload attachment
+	file, err := c.FormFile("file")
+	if err != nil {
+		errorMessage := gin.H{"is_uploaded": false}
+
+		response := helper.APIResponse("Terjadi Kesalahan Saat Mengunggah Gambar", http.StatusBadRequest, "Gagal", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	path := fmt.Sprintf("images/activity/%d-%s", currentUser.ID, file.Filename)
+	err = c.SaveUploadedFile(file, path)
+	if err != nil {
+		errorMessage := gin.H{"is_uploaded": false}
+
+		response := helper.APIResponse("Terjadi Kesalahan Saat Mengunggah Gambar", http.StatusBadRequest, "Gagal", errorMessage)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	input.ImageUrl = path
+
+	newActivity, err := h.campaignService.CreateActivity(input)
+	if err != nil {
+		response := helper.APIResponse("Gagal buat Activity", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Berhasil Buat Campaign", http.StatusOK, "sukses", campaign.FormatCampaignActivity(newActivity))
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *campaignHandler) UpdateActivity(c *gin.Context) {
+	var input campaign.UpdateCampaignActivityInput
+	err := c.ShouldBind(&input)
+	fmt.Println(input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Gagal Ubah Activity", http.StatusUnprocessableEntity, "gagal", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+
+	input.User = currentUser
+
+	file, err := c.FormFile("file")
+	if file != nil {
+		if err != nil {
+			errorMessage := gin.H{"is_uploaded": false}
+
+			response := helper.APIResponse("Terjadi Kesalahan Saat Mengunggah Gambar", http.StatusBadRequest, "Gagal", errorMessage)
+			c.JSON(http.StatusBadRequest, response)
+			return
+		}
+		path := fmt.Sprintf("images/activity/%d-%s", currentUser.ID, file.Filename)
+		err = c.SaveUploadedFile(file, path)
+		if err != nil {
+			errorMessage := gin.H{"is_uploaded": false}
+
+			response := helper.APIResponse("Terjadi Kesalahan Saat Mengunggah Gambar", http.StatusBadRequest, "Gagal", errorMessage)
+			c.JSON(http.StatusBadRequest, response)
+			return
+		}
+		input.ImageUrl = path
+	} else {
+		// ambil imageURL terakhir jika tidak mengubah file
+		currentActivity, err := h.campaignService.FindActivityByUser(
+			campaign.GetCampaignActivityInput{
+				ID:         input.ID,
+				CampaignID: input.CampaignID,
+			},
+			campaign.GetUserCampaign{
+				User: currentUser,
+			},
+		)
+		if err != nil {
+			response := helper.APIResponse("Gagal Ubah Activity", http.StatusBadRequest, "error", err.Error())
+			c.JSON(http.StatusBadRequest, response)
+			return
+		}
+		input.ImageUrl = currentActivity.ImageUrl
+	}
+
+	updateActivity, err := h.campaignService.UpdateActivity(input)
+	if err != nil {
+		response := helper.APIResponse("Gagal Ubah Activity", http.StatusBadRequest, "error", err.Error())
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Berhasil Buat Campaign", http.StatusOK, "sukses", campaign.FormatCampaignActivity(updateActivity))
+	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *campaignHandler) DeleteActivity(c *gin.Context) {
+	var input campaign.DeleteCampaignActivityInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Gagal Menghapus Activity", http.StatusUnprocessableEntity, "gagal", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	currentUser := c.MustGet("currentUser").(user.User)
+
+	input.User = currentUser
+
+	isDeleted, err := h.campaignService.DeleteActivity(input)
+	if err != nil {
+		response := helper.APIResponse("Gagal Menghapus Activity", http.StatusBadRequest, "error", err.Error())
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Berhasil Menghapus Reward", http.StatusOK, "sukses", isDeleted)
+	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *campaignHandler) FindActivity(c *gin.Context) {
+	var input campaign.GetCampaignActivityInput
+	err := c.ShouldBindUri(&input)
+
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Gagal Menemukan Activity", http.StatusUnprocessableEntity, "gagal", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	activity, err := h.campaignService.FindActivity(input.ID)
+	if err != nil {
+		response := helper.APIResponse("Gagal Menemukan Activity", http.StatusBadRequest, "error", err.Error())
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Berhasil Menmukan Reward", http.StatusOK, "sukses", campaign.FormatCampaignActivity(activity))
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *campaignHandler) FindActivityByUser(c *gin.Context) {
+	var input campaign.GetCampaignActivityInput
+	err := c.ShouldBindUri(&input)
+
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Gagal Menemukan Activity", http.StatusUnprocessableEntity, "gagal", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+	var userCampaign campaign.GetUserCampaign
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	userCampaign.User = currentUser
+
+	activity, err := h.campaignService.FindActivityByUser(input, userCampaign)
+	if err != nil {
+		response := helper.APIResponse("Gagal Menemukan Activity", http.StatusBadRequest, "error", err.Error())
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Berhasil Menemukan Activity", http.StatusOK, "sukses", campaign.FormatCampaignActivity(activity))
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *campaignHandler) FindAllActivityByCampaignID(c *gin.Context) {
+	var input campaign.GetCampaignDetailInput
+	err := c.ShouldBindUri(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Gagal Menemukan Activity", http.StatusUnprocessableEntity, "gagal", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	campaignActivity, err := h.campaignService.FindAllActivityByCampaignID(input.ID)
+	if err != nil {
+		response := helper.APIResponse("Gagal Menemukan Activity", http.StatusBadRequest, "error", err.Error())
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	response := helper.APIResponse("Berhasil Menmukan Activity", http.StatusOK, "sukses", campaign.FormatCampaignActivities(campaignActivity))
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *campaignHandler) PaginateCampaigns(c *gin.Context) {
+	var input campaign.PaginateCampaignInput
+	page, _ := strconv.Atoi(c.Query("page"))
+	input.ActivePage = page
+	err := c.ShouldBindJSON(&input)
+	fmt.Println(input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Terjadi Kesalahan", http.StatusUnprocessableEntity, "gagal", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	paginate, err := h.campaignService.Paginate(input)
+	if err != nil {
+		response := helper.APIResponse("Gagal Mengambil Data", http.StatusBadRequest, "error", err.Error())
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Berhasil Menmukan Activity", http.StatusOK, "sukses", paginate)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *campaignHandler) CreateCattegory(c *gin.Context) {
+	var input campaign.CattegoryInput
+	err := c.ShouldBindJSON(&input)
+
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Terjadi Kesalahan", http.StatusUnprocessableEntity, "gagal", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	cattegory, err := h.campaignService.CreateCattegory(input)
+
+	if err != nil {
+		response := helper.APIResponse("Gagal Input Cattegory", http.StatusBadRequest, "error", err.Error())
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Berhasil input cattegory", http.StatusOK, "sukses", cattegory)
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *campaignHandler) DeleteCattegory(c *gin.Context) {
+	var input campaign.CattegoryIdInput
+	err := c.ShouldBindJSON(&input)
+
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Terjadi Kesalahan", http.StatusUnprocessableEntity, "gagal", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	delete, err := h.campaignService.DeleteCattegory(input.ID)
+	if err != nil {
+		response := helper.APIResponse("Gagal delete Cattegory", http.StatusBadRequest, "error", err.Error())
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Berhasil delete Activity", http.StatusOK, "sukses", delete)
+	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *campaignHandler) FindAllCattegory(c *gin.Context) {
+	cattegory, err := h.campaignService.FindAllCattegory()
+
+	if err != nil {
+		response := helper.APIResponse("Gagal Mengambil Data Cattegory", http.StatusBadRequest, "error", err.Error())
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Berhasil ambil cattegory", http.StatusOK, "sukses", cattegory)
+	c.JSON(http.StatusOK, response)
+
 }
 
 // tangkap input kedalam struct

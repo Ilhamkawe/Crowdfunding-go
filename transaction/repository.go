@@ -1,6 +1,10 @@
 package transaction
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+
+	"gorm.io/gorm"
+)
 
 type Repository interface {
 	GetByCampaignID(ID int) ([]Transaction, error)
@@ -9,6 +13,13 @@ type Repository interface {
 	Save(transaction Transaction) (Transaction, error)
 	Update(transaction Transaction) (Transaction, error)
 	FindAll() ([]Transaction, error)
+	FindAllByReward(Rid int, Cid int) ([]Transaction, error)
+	FindAllByRewardPaginate(Rid int, Cid int, limit int, offset int) ([]Transaction, error)
+	CollectAmount(input CollectCampaign) (CollectCampaign, error)
+	FindCollectDataByID(id int) ([]CollectCampaign, error)
+	FindAllCollectData() ([]CollectCampaign, error)
+	FindCollectDataByCID(id int) (CollectCampaign, error)
+	UpdateCollect(collect CollectCampaign) (CollectCampaign, error)
 }
 
 type repository struct {
@@ -33,7 +44,7 @@ func (r *repository) GetByCampaignID(ID int) ([]Transaction, error) {
 func (r *repository) GetByUserID(userID int) ([]Transaction, error) {
 	var transactions []Transaction
 
-	err := r.db.Preload("Campaign.CampaignImages", "campaign_images.is_primary = 1").Where("user_id = ?", userID).Find(&transactions).Error
+	err := r.db.Preload("Campaign.CampaignImages", "campaign_images.is_primary = 1").Where("user_id = ?", userID).Order("created_at desc").Find(&transactions).Error
 	if err != nil {
 		return transactions, err
 	}
@@ -84,4 +95,82 @@ func (r *repository) FindAll() ([]Transaction, error) {
 
 	return transaction, err
 
+}
+
+func (r *repository) FindAllByReward(Rid int, Cid int) ([]Transaction, error) {
+	var transaction []Transaction
+
+	err := r.db.Preload("Campaign").Preload("Reward").Preload("User").Where("reward_id = ? AND campaign_id = ? AND status = ?", Rid, Cid, "paid").Order("created_at desc").Find(&transaction).Error
+
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, err
+
+}
+
+func (r *repository) FindAllByRewardPaginate(Rid int, Cid int, limit int, offset int) ([]Transaction, error) {
+	var transaction []Transaction
+
+	err := r.db.Preload("Campaign").Preload("Reward").Preload("User").Where("reward_id = ? AND campaign_id = ? AND status = ?", Rid, Cid, "paid").Limit(limit).Offset(offset).Order("created_at desc").Find(&transaction).Error
+
+	if err != nil {
+		return transaction, err
+	}
+
+	return transaction, err
+
+}
+
+func (r *repository) CollectAmount(input CollectCampaign) (CollectCampaign, error) {
+	err := r.db.Create(&input).Error
+
+	if err != nil {
+		return input, err
+	}
+
+	return input, nil
+}
+
+func (r *repository) FindCollectDataByID(id int) ([]CollectCampaign, error) {
+	var collectData []CollectCampaign
+	err := r.db.Where("campaign_id = ?", id).Find(&collectData).Error
+
+	if err != nil {
+		return []CollectCampaign{}, err
+	}
+
+	return collectData, nil
+}
+
+func (r *repository) FindCollectDataByCID(id int) (CollectCampaign, error) {
+	var collectData CollectCampaign
+	err := r.db.Preload("Campaign").Preload("User").Where("id = ?", id).Find(&collectData).Error
+
+	if err != nil {
+		return CollectCampaign{}, err
+	}
+	fmt.Println(err)
+	fmt.Println(collectData)
+	return collectData, nil
+}
+
+func (r *repository) FindAllCollectData() ([]CollectCampaign, error) {
+	var collectData []CollectCampaign
+	err := r.db.Preload("Campaign").Preload("User").Order("Status asc").Find(&collectData).Error
+
+	if err != nil {
+		return []CollectCampaign{}, err
+	}
+
+	return collectData, nil
+}
+
+func (r *repository) UpdateCollect(collect CollectCampaign) (CollectCampaign, error) {
+	err := r.db.Save(&collect).Error
+	if err != nil {
+		return collect, err
+	}
+	return collect, nil
 }

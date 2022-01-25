@@ -244,3 +244,36 @@ func (h *userHandler) FetchUser(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 
 }
+
+func (h *userHandler) ChangePassword(c *gin.Context) {
+	var input user.ChangePasswordInput
+	currentUser := c.MustGet("currentUser").(user.User)
+
+	err := c.ShouldBindJSON(&input)
+
+	if err != nil {
+		errorMessage := gin.H{"errors": "Terjadi Kesalahan"}
+
+		response := helper.APIResponse("Gagal saat mengubah password", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+
+		return
+	}
+
+	input.ID = currentUser.ID
+
+	_, err = h.userService.ChangePassword(input)
+
+	if err != nil {
+		errorMessage := gin.H{"errors": "Terjadi Kesalahan"}
+
+		response := helper.APIResponse("Gagal saat update user", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+
+		return
+	}
+	data := gin.H{"change_password": true}
+	response := helper.APIResponse("Terjadi kesalahan saat mengunggah avatar", http.StatusOK, "Berhasil", data)
+	c.JSON(http.StatusOK, response)
+
+}

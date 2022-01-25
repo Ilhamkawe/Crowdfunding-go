@@ -34,3 +34,8 @@ type FormUpdateRegister struct {
 	Occupation string `form:"occupation" binding:"required"`
 	Email      string `form:"email" binding:"required,email"`
 }
+
+type ChangePasswordInput struct {
+	ID           int
+	PasswordHash string `json:"password" binding:"required"`
+}

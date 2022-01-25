@@ -16,6 +16,7 @@ type Service interface {
 	GetAllUsers() ([]User, error)
 	UpdateUser(input FormUpdateRegister) (User, error)
 	UpdateUserInfo(ID int, input UpdateInfoUserInput) (User, error)
+	ChangePassword(input ChangePasswordInput) (User, error)
 }
 
 // Struct service
@@ -173,6 +174,28 @@ func (s *service) UpdateUser(input FormUpdateRegister) (User, error) {
 
 	return updatedUser, err
 
+}
+
+func (s *service) ChangePassword(input ChangePasswordInput) (User, error) {
+
+	user, err := s.repository.FindById(input.ID)
+
+	if err != nil {
+		return user, err
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(input.PasswordHash), bcrypt.MinCost)
+	if err != nil {
+		return user, err
+	}
+
+	user.PasswordHash = string(passwordHash)
+
+	newPassword, err := s.repository.ChangePassword(user)
+	if err != nil {
+		return newPassword, err
+	}
+	return newPassword, nil
 }
 
 // kegunaan service

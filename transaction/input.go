@@ -21,3 +21,12 @@ type TransactionNotificationInput struct {
 	PaymentType       string `json:"payment_type"`
 	FraudStatus       string `json:"fraud_status"`
 }
+
+type CollectInput struct {
+	CampaignID  int    `json:"campaign_id" binding:"required"`
+	UserID      int    `json:"user_id" binding:"required"`
+	AccountName string `json:"account_name" binding:"required"`
+	NoRekening  string `json:"no_rekening" binding:"required"`
+	Bank        string `json:"bank" binding:"required"`
+	Status      string `json:"status"`
+}

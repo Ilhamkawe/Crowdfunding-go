@@ -1,30 +1,39 @@
 package campaign
 
-import "crowdfunding-TA/user"
+import (
+	"crowdfunding-TA/user"
+)
 
 type GetCampaignDetailInput struct {
 	ID int `uri:"id" binding:"required"`
 }
-
 type GetLimitDataInput struct {
 	Limit int `uri:"limit"`
 }
-
+type GetCampaignActivityInput struct {
+	ID         int `uri:"id"`
+	CampaignID int `uri:"campaign_id"`
+}
 type GetUserCampaign struct {
 	User user.User
 }
-
 type SearchCampaignInput struct {
 	Name      string `json:"name"`
 	Cattegory string `json:"cattegory" binding:"required"`
 }
-
+type SearchCampaignPaginate struct {
+	Name       string `json:"name"`
+	Cattegory  string `json:"cattegory" binding:"required"`
+	Limit      int    `json:"limit"`
+	ActivePage int
+}
 type CreateCampaignInput struct {
 	Name             string `form:"name" binding:"required"`
 	ShortDescription string `form:"short_description" binding:"required"`
 	Description      string `form:"description" binding:"required"`
 	GoalAmount       int    `form:"goal_amount" binding:"required"`
 	Cattegory        string `form:"cattegory" binding:"required"`
+	FinishAt         string `form:"finish_at"`
 	Path             string `form:"path"`
 	User             user.User
 }
@@ -86,4 +95,41 @@ type FormCampaignUpdate struct {
 	GoalAmount       int    `form:"goal_amount" binding:"required"`
 	Perks            string `form:"perks" binding:"required"`
 	Users            []user.User
+}
+type CreateCampaignActivityInput struct {
+	CampaignID       int    `form:"campaign_id" binding:"required"`
+	Name             string `form:"name" binding:"required"`
+	ShortDescription string `form:"short_description" binding:"required"`
+	Description      string `form:"description" binding:"required"`
+	ImageUrl         string
+	User             user.User
+}
+type UpdateCampaignActivityInput struct {
+	ID               int    `form:"id" binding:"required"`
+	CampaignID       int    `form:"campaign_id" binding:"required"`
+	Name             string `form:"name" binding:"required"`
+	ShortDescription string `form:"short_description" binding:"required"`
+	Description      string `form:"description" binding:"required"`
+	ImageUrl         string
+	User             user.User
+}
+type DeleteCampaignActivityInput struct {
+	CampaignID int `json:"campaign_id" binding:"required"`
+	ActivityID int `json:"activity_id" binding:"required"`
+	User       user.User
+}
+type FindUserCampaignActivityUser struct {
+	CampaignID int `json:"campaign_id" binding:"required"`
+	ActivityID int `json:"activity_id" binding:"required"`
+	User       user.User
+}
+type PaginateCampaignInput struct {
+	ActivePage int
+	Limit      int `json:"limit"`
+}
+type CattegoryInput struct {
+	Name string `json:"name" form:"name" binding:"required"`
+}
+type CattegoryIdInput struct {
+	ID int `json:"id" binding:"required"`
 }

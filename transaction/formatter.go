@@ -1,15 +1,19 @@
 package transaction
 
 import (
+	"crowdfunding-TA/campaign"
 	"crowdfunding-TA/user"
 	"time"
 )
 
 type CampaignTransactionFormatter struct {
 	ID        int       `json:"id"`
+	RewardID  int       `json:"reward_id"`
 	Amount    int       `json:"amount"`
 	CreatedAt time.Time `json:"created_at"`
 	User      user.User
+	Reward    campaign.CampaignReward
+	Campaign  campaign.Campaign
 }
 
 func FormatTransaction(transaction Transaction) CampaignTransactionFormatter {
@@ -18,6 +22,9 @@ func FormatTransaction(transaction Transaction) CampaignTransactionFormatter {
 	formatter.Amount = transaction.Amount
 	formatter.CreatedAt = transaction.CreatedAt
 	formatter.User = transaction.User
+	formatter.RewardID = transaction.RewardID
+	formatter.Reward = transaction.Reward
+	formatter.Campaign = transaction.Campaign
 
 	return formatter
 }
@@ -34,6 +41,14 @@ func FormatTransactions(transaction []Transaction) []CampaignTransactionFormatte
 	}
 
 	return transactionsFormatter
+}
+
+type PaginateTransactions struct {
+	Limit         int                            `json:"limit"`
+	Page          int                            `json:"page"`
+	PageCount     int                            `json:"page_count"`
+	CountCampaign int                            `json:"count_campaign"`
+	Transactions  []CampaignTransactionFormatter `json:"campaigns"`
 }
 
 type UserTransactionFormatter struct {

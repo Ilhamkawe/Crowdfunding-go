@@ -9,14 +9,17 @@ import (
 	"crowdfunding-TA/transaction"
 	"crowdfunding-TA/user"
 	webHandler "crowdfunding-TA/web/handler"
+	"fmt"
 	"log"
 	"path/filepath"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/multitemplate"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron/v3"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -29,6 +32,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
+	// !=================================================================================
 
 	// * Middleware
 	// !=================================================================================
@@ -65,6 +70,18 @@ func main() {
 	sessionWebHandler := webHandler.NewSessionHandler(userService)
 	// !=================================================================================
 
+	// * Task Scheduler
+	// !=================================================================================
+	// set jadwal berdasarkan zona waktu indonesia
+	jakarta, _ := time.LoadLocation("Asia/Jakarta")
+	scheduler := cron.New(cron.WithLocation(jakarta))
+
+	defer scheduler.Stop()
+
+	scheduler.AddFunc("0 0 * * *", campaignService.IsCollectAbleByDate)
+
+	go scheduler.Start()
+
 	// ? test
 
 	// membuat Router
@@ -96,9 +113,10 @@ func main() {
 	api.POST("/avatars", middleware.AuthMiddleware(authService, userService), userHandler.UploadAvatar)
 	api.PUT("/users/update", middleware.AuthMiddleware(authService, userService), userHandler.UpdateUserInfo)
 	api.GET("/users/fetch", middleware.AuthMiddleware(authService, userService), userHandler.FetchUser)
-
+	api.PUT("/users/changepass", middleware.AuthMiddleware(authService, userService), userHandler.ChangePassword)
 	// Campaign Route
 	api.GET("/campaigns", campaignHandler.GetCampaigns)
+	api.POST("/campaigns/paginate", campaignHandler.PaginateCampaigns)
 	api.GET("/campaigns/:id", campaignHandler.GetCampaign)
 	api.GET("/campaigns/L/:limit", campaignHandler.Limit)
 	api.GET("/campaigns/R/:id", campaignHandler.GetRewards)
@@ -110,12 +128,26 @@ func main() {
 	api.POST("/campaign-reward", middleware.AuthMiddleware(authService, userService), campaignHandler.CreateCampaignReward)
 	api.POST("/campaign-reward/delete", middleware.AuthMiddleware(authService, userService), campaignHandler.DeleteReward)
 	api.DELETE("/campaign-image", middleware.AuthMiddleware(authService, userService), campaignHandler.DeleteImage)
+	api.POST("/campaign/search/paginate", campaignHandler.SearchCampaignPaginate)
 	api.POST("/campaign/search", campaignHandler.SearchCampaign)
-
+	api.POST("/campaign/activity", middleware.AuthMiddleware(authService, userService), campaignHandler.CreateActivity)
+	api.PUT("/campaign/activity", middleware.AuthMiddleware(authService, userService), campaignHandler.UpdateActivity)
+	api.DELETE("/campaign/activity", middleware.AuthMiddleware(authService, userService), campaignHandler.DeleteActivity)
+	api.GET("/campaign/user/activity/:id/:campaign_id", middleware.AuthMiddleware(authService, userService), campaignHandler.FindActivityByUser)
+	api.GET("/campaign/activity/find/:id", campaignHandler.FindActivity)
+	api.GET("/campaign/activity/:id", campaignHandler.FindAllActivityByCampaignID)
+	// Cattegory Route
+	api.GET("/cattegory", campaignHandler.FindAllCattegory)
+	api.DELETE("/cattegory/:id/delete", campaignHandler.DeleteCattegory)
+	api.POST("/cattegory", campaignHandler.CreateCattegory)
 	// transaction Route
 	api.GET("/campaigns/:id/transactions", middleware.AuthMiddleware(authService, userService), transactionHandler.GetCampaignTransaction)
+	api.POST("/campaigns/transactions/:id/reward", middleware.AuthMiddleware(authService, userService), transactionHandler.GetAllByReward)
 	api.GET("/transactions", middleware.AuthMiddleware(authService, userService), transactionHandler.GetUserTransaction)
 	api.POST("/transactions", middleware.AuthMiddleware(authService, userService), transactionHandler.CreateTransaction)
+	api.POST("/transactions/notification", transactionHandler.GetNotification)
+	api.POST("/collect", middleware.AuthMiddleware(authService, userService), transactionHandler.CollectAmount)
+	api.GET("/collect/:id", middleware.AuthMiddleware(authService, userService), transactionHandler.FindCollectData)
 
 	// CMS Route
 	router.GET("/users", middleware.AdminMiddleware(), userWebHandler.Index)
@@ -134,7 +166,13 @@ func main() {
 	router.POST("/campaign/:id/edit", middleware.AdminMiddleware(), campaignWebHandler.Update)
 	router.GET("/campaign/:id/show", middleware.AdminMiddleware(), campaignWebHandler.Detail)
 	router.GET("/campaign/:id/:status", middleware.AdminMiddleware(), campaignWebHandler.ChangeStatus)
+	router.GET("/cattegory", middleware.AdminMiddleware(), campaignWebHandler.CattegoryIndex)
+	router.POST("/cattegory", middleware.AdminMiddleware(), campaignWebHandler.StoreCattegory)
+	router.GET("/cattegory/:id/delete", middleware.AdminMiddleware(), campaignWebHandler.DeleteCattegory)
 	router.GET("/transactions", middleware.AdminMiddleware(), transactionWebHandler.Index)
+	router.GET("/collect", middleware.AdminMiddleware(), transactionWebHandler.CollectList)
+	router.GET("/collect/:id", middleware.AdminMiddleware(), transactionWebHandler.Collect)
+	router.GET("/collect/:id/:status", middleware.AdminMiddleware(), transactionWebHandler.ChangeCollectStatus)
 	router.GET("/login", sessionWebHandler.Index)
 	router.POST("/login", sessionWebHandler.Login)
 	router.GET("/logout", sessionWebHandler.Logout)
@@ -173,3 +211,9 @@ func loadTemplates(templatesDir string) multitemplate.Renderer {
 // ambil user_id
 // ambil user dari db berdasarkan id lewat service
 // set context isinya user
+
+func TestScheduler() {
+
+	fmt.Println("Berhasil Menggunakan Cron Job")
+
+}

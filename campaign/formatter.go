@@ -1,6 +1,8 @@
 package campaign
 
-import "strings"
+import (
+	"strings"
+)
 
 type CampaignFormatter struct {
 	ID               int                   `json:"id"`
@@ -57,6 +59,14 @@ func FormatCampaigns(campaigns []Campaign) []CampaignFormatter {
 	return campaignsFormatter
 }
 
+type PaginateCampaigns struct {
+	Limit         int                 `json:"limit"`
+	Page          int                 `json:"page"`
+	PageCount     int                 `json:"page_count"`
+	CountCampaign int                 `json:"count_campaign"`
+	Campaigns     []CampaignFormatter `json:"campaigns"`
+}
+
 type CampaignDetailFormatter struct {
 	ID               int                       `json:"id" `
 	Name             string                    `json:"name"`
@@ -71,6 +81,8 @@ type CampaignDetailFormatter struct {
 	Slug             string                    `json:"slug"`
 	Status           string                    `json:"status"`
 	Attachment       string                    `json:"attachment"`
+	FinishAt         string                    `json:"finish_at"`
+	Collectable      bool                      `json:"collectable"`
 	Rewards          []CampaignRewardFormatter `json:"reward"`
 	User             CampaignUserFormatter     `json:"user"`
 	Images           []CampaignImageFormatter  `json:"images"`
@@ -121,6 +133,8 @@ func FormatCampaignDetail(campaign Campaign) CampaignDetailFormatter {
 	campaignDetailFormatter.Slug = campaign.Slug
 	campaignDetailFormatter.Status = campaign.Status
 	campaignDetailFormatter.Attachment = campaign.Attachment
+	campaignDetailFormatter.FinishAt = campaign.FinishAt
+	campaignDetailFormatter.Collectable = campaign.Collectable
 	if len(campaign.CampaignImages) > 0 {
 		campaignDetailFormatter.ImageUrl = campaign.CampaignImages[0].FileName
 	}
@@ -171,4 +185,35 @@ func FormatCampaignDetail(campaign Campaign) CampaignDetailFormatter {
 	campaignDetailFormatter.Rewards = rewards
 
 	return campaignDetailFormatter
+}
+
+type CampaignActivityFormatter struct {
+	ID               int    `json:"id"`
+	Name             string `json:"name"`
+	ShortDescription string `json:"short_description"`
+	Description      string `json:"description"`
+	ImageUrl         string `json:"image_url"`
+	Slug             string `json:"slug"`
+	CampaignSlug     string `json:"campaign"`
+}
+
+func FormatCampaignActivity(activity CampaignActivity) CampaignActivityFormatter {
+	campaignActivityFormatter := CampaignActivityFormatter{}
+	campaignActivityFormatter.ID = activity.ID
+	campaignActivityFormatter.Name = activity.Name
+	campaignActivityFormatter.ShortDescription = activity.ShortDescription
+	campaignActivityFormatter.Description = activity.Description
+	campaignActivityFormatter.Slug = activity.Slug
+	campaignActivityFormatter.CampaignSlug = activity.Campaign.Slug
+	campaignActivityFormatter.ImageUrl = activity.ImageUrl
+	return campaignActivityFormatter
+}
+
+func FormatCampaignActivities(activity []CampaignActivity) []CampaignActivityFormatter {
+	campaignActivitiesFormatter := []CampaignActivityFormatter{}
+	for _, activity := range activity {
+		activityFormatter := FormatCampaignActivity(activity)
+		campaignActivitiesFormatter = append(campaignActivitiesFormatter, activityFormatter)
+	}
+	return campaignActivitiesFormatter
 }

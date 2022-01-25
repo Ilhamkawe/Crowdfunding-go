@@ -20,6 +20,8 @@ type Campaign struct {
 	Slug             string
 	Status           string
 	Attachment       string
+	Collectable      bool
+	FinishAt         string
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 	User             user.User
@@ -49,4 +51,22 @@ type CampaignReward struct {
 	MinDonate   int
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+}
+
+type CampaignActivity struct {
+	ID               int
+	CampaignID       int
+	Name             string
+	ShortDescription string
+	Description      string
+	ImageUrl         string
+	Slug             string
+	Campaign         Campaign
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+}
+
+type Cattegory struct {
+	ID   int
+	Name string
 }

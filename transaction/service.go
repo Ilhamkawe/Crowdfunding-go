@@ -4,6 +4,7 @@ import (
 	"crowdfunding-TA/campaign"
 	"crowdfunding-TA/payment"
 	"fmt"
+	"math"
 	"strconv"
 
 	// "crowdfunding-TA/payment"
@@ -16,6 +17,12 @@ type Service interface {
 	CreateTransaction(input CreateTransactionInput) (Transaction, error)
 	ProcessPayment(input TransactionNotificationInput) error
 	FindAll() ([]Transaction, error)
+	FindAllByReward(Rid int, Cid int, Uid int, input campaign.PaginateCampaignInput) (PaginateTransactions, error)
+	CollectAmount(input CollectInput) (CollectCampaign, error)
+	FindCollectData(id int) ([]CollectCampaign, error)
+	FindAllCollectData() ([]CollectCampaign, error)
+	FindCollectDataByCID(id int) (CollectCampaign, error)
+	ChangeCollectStatus(Status string, ID int) (CollectCampaign, error)
 }
 
 type service struct {
@@ -128,7 +135,9 @@ func (s *service) ProcessPayment(input TransactionNotificationInput) error {
 	if updatedTransaction.Status == "paid" {
 		campaign.BackerCount = campaign.BackerCount + 1
 		campaign.CurrentAmount = campaign.CurrentAmount + updatedTransaction.Amount
-
+		if !campaign.Collectable && campaign.CurrentAmount >= campaign.GoalAmount {
+			campaign.Collectable = true
+		}
 		_, err := s.campaignRepository.Update(campaign)
 		if err != nil {
 			return err
@@ -147,4 +156,117 @@ func (s *service) FindAll() ([]Transaction, error) {
 
 	return transaction, nil
 
+}
+
+func (s *service) FindAllByReward(Rid int, Cid int, Uid int, input campaign.PaginateCampaignInput) (PaginateTransactions, error) {
+	transaction, err := s.repository.FindAllByReward(Rid, Cid)
+
+	if err != nil {
+		return PaginateTransactions{}, err
+	}
+
+	offset := (input.ActivePage * input.Limit) - input.Limit
+
+	countCampaigns := len(transaction)
+	pages := int(math.Ceil(float64(countCampaigns) / float64(input.Limit)))
+
+	if input.ActivePage > pages {
+		return PaginateTransactions{}, errors.New("data tidak ada")
+	}
+
+	paginateTransactions, err := s.repository.FindAllByRewardPaginate(Rid, Cid, input.Limit, offset)
+
+	if err != nil {
+		return PaginateTransactions{}, err
+	}
+
+	var PaginateTransaction PaginateTransactions
+	PaginateTransaction.Limit = input.Limit
+	PaginateTransaction.CountCampaign = countCampaigns
+	PaginateTransaction.PageCount = pages
+	PaginateTransaction.Page = input.ActivePage
+	PaginateTransaction.Transactions = FormatTransactions(paginateTransactions)
+
+	return PaginateTransaction, nil
+}
+
+func (s *service) CollectAmount(input CollectInput) (CollectCampaign, error) {
+	collect := CollectCampaign{}
+	collect.CampaignID = input.CampaignID
+	collect.UserID = input.UserID
+	collect.AccountName = input.AccountName
+	collect.NoRekening = input.NoRekening
+	collect.Bank = input.Bank
+	collect.Status = "Pending"
+
+	newCollect, err := s.repository.CollectAmount(collect)
+	if err != nil {
+		return newCollect, err
+	}
+
+	campaign, err := s.campaignRepository.FindUserCampaign(input.CampaignID)
+
+	if err != nil {
+		return CollectCampaign{}, err
+	}
+
+	campaign.Status = "Dicairkan"
+
+	fmt.Println(campaign)
+
+	_, err = s.campaignRepository.Update(campaign)
+	if err != nil {
+		return CollectCampaign{}, err
+	}
+
+	return newCollect, nil
+
+}
+
+func (s *service) FindCollectData(id int) ([]CollectCampaign, error) {
+
+	collectData, err := s.repository.FindCollectDataByID(id)
+
+	if err != nil {
+		return []CollectCampaign{}, err
+	}
+
+	return collectData, nil
+
+}
+func (s *service) FindCollectDataByCID(id int) (CollectCampaign, error) {
+
+	collectData, err := s.repository.FindCollectDataByCID(id)
+	if err != nil {
+		return CollectCampaign{}, err
+	}
+
+	return collectData, nil
+}
+func (s *service) FindAllCollectData() ([]CollectCampaign, error) {
+
+	collectData, err := s.repository.FindAllCollectData()
+
+	if err != nil {
+		return []CollectCampaign{}, err
+	}
+
+	return collectData, nil
+
+}
+
+func (s *service) ChangeCollectStatus(Status string, ID int) (CollectCampaign, error) {
+	collectData, err := s.repository.FindCollectDataByCID(ID)
+	if err != nil {
+		return CollectCampaign{}, err
+	}
+
+	collectData.Status = Status
+
+	updateCollect, err := s.repository.UpdateCollect(collectData)
+	if err != nil {
+		return updateCollect, err
+	}
+
+	return updateCollect, nil
 }

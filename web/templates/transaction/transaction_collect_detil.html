@@ -1,0 +1,58 @@
+{{ define "content" }}
+  <!-- partial:partials/_navbar.html -->
+  <!-- partial -->
+  <div class="container-fluid page-body-wrapper">
+    {{ template "navbar" }}
+    {{ template "theme-setting" }}
+    {{ template "right-sidebar"}}
+    <!-- partial:partials/_sidebar.html -->
+    {{ template "sidebar" }}
+    <!-- partial -->
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <div class="row">
+            <div class="col-12 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <h4 class="card-title">Buat Data Kampanye Baru</h4>
+                    <form class="forms-sample" method="POST" action="/campaign/{{ .ampaign.ID }}/edit">
+                      <div class="form-group">
+                        <label for="exampleInputEmail3">Nama User</label>
+                        <input type="text" class="form-control" id="exampleInputEmail3" required placeholder="Pengguna" name="user" value="{{ .transactions.AccountName }}" disabled>
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputEmail3">No Rekening</label>
+                        <input type="text" class="form-control" id="exampleInputEmail3" required placeholder="Nama Kampanye" name="name" value="{{ .transactions.NoRekening }}" disabled>
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputEmail3">Bank</label>
+                        <input type="text" class="form-control" id="exampleInputEmail3" required placeholder="Deksripsi Singkat" name="short_description" value="{{ .transactions.Bank }}" disabled>
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputPassword4">Campaign</label>
+                        <input type="text" class="form-control" id="exampleInputPassword4" required placeholder="Jumlah Tujuan" name="goal_amount" value="{{  .transactions.Campaign.Name }}" disabled>
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputPassword4">Total Dana</label>
+                        <input type="text" class="form-control" id="exampleInputPassword4" required placeholder="Jumlah Tujuan" name="goal_amount" value="{{  .transactions.Campaign.CurrentAmount }}" disabled>
+                      </div>
+                      
+                      <div class="form-group">
+                        <label for="exampleInputPassword4">Aksi</label><br>
+                        {{ if .status}}
+                        <a href="/collect/{{ .transactions.ID }}/Pending"  class="btn btn-warning me-2">Pending</a>
+                        {{ else }}
+                        <a href="/collect/{{ .transactions.ID }}/Sukses"  class="btn btn-success me-2">Sukses</a>
+                        {{ end }}
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+        </div>
+    </div>
+    </div>
+    <!-- main-panel ends -->
+  </div>
+  <!-- page-body-wrapper ends -->
+{{ end }}

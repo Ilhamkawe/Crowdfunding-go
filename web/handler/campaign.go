@@ -260,3 +260,56 @@ func (h *campaignHandler) Detail(c *gin.Context) {
 	})
 
 }
+
+func (h *campaignHandler) CattegoryIndex(c *gin.Context) {
+	cattegories, err := h.campaignService.FindAllCattegory()
+	if err != nil {
+		c.HTML(http.StatusOK, "error.html", nil)
+		return
+	}
+
+	c.HTML(http.StatusOK, "cattegory_index.html", gin.H{
+		"cattegory": cattegories,
+	})
+}
+
+func (h *campaignHandler) DeleteCattegory(c *gin.Context) {
+	var input campaign.GetCampaignDetailInput
+	err := c.ShouldBindUri(&input)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
+			"error": err,
+		})
+		return
+	}
+	_, err = h.campaignService.DeleteCattegory(input.ID)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/cattegory")
+}
+
+func (h *campaignHandler) StoreCattegory(c *gin.Context) {
+	var input campaign.CattegoryInput
+	err := c.ShouldBind(&input)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	_, err = h.campaignService.CreateCattegory(input)
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/cattegory")
+}

@@ -8,6 +8,18 @@ import (
 	"github.com/leekchan/accounting"
 )
 
+type CollectCampaign struct {
+	ID          int
+	CampaignID  int
+	UserID      int
+	AccountName string
+	NoRekening  string
+	Bank        string
+	Status      string
+	User        user.User
+	Campaign    campaign.Campaign
+}
+
 type Transaction struct {
 	ID         int
 	CampaignID int
@@ -20,6 +32,7 @@ type Transaction struct {
 	PaymentUrl string
 	User       user.User
 	Campaign   campaign.Campaign
+	Reward     campaign.CampaignReward
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }

@@ -10,6 +10,7 @@ type Repository interface {
 	FindById(ID int) (User, error)
 	Update(user User) (User, error)
 	FindAll() ([]User, error)
+	ChangePassword(user User) (User, error)
 }
 
 type repository struct {
@@ -45,7 +46,7 @@ func (r *repository) FindByEmail(email string) (User, error) {
 	return user, nil
 }
 
-// mencari user berdasarkan email
+// mencari user berdasarkan id
 func (r *repository) FindById(ID int) (User, error) {
 	var user User
 
@@ -81,5 +82,14 @@ func (r *repository) FindAll() ([]User, error) {
 		return user, err
 	}
 
+	return user, nil
+}
+
+// update password
+func (r *repository) ChangePassword(user User) (User, error) {
+	err := r.db.Model(&user).Updates(User{PasswordHash: user.PasswordHash}).Error
+	if err != nil {
+		return user, err
+	}
 	return user, nil
 }
