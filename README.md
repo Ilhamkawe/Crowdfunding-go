@@ -16,6 +16,7 @@ Request :
 ```
 Response :
 ```JSON
+{
      "meta": {
         "message": "Berhasil daftar akun",
         "code": 200,
@@ -28,5 +29,5 @@ Response :
         "email": "Kawekaweha00@gmail.com",
         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNX0.kFZqgyl1J5dln_PR90B1c-9JL-eTv3HQnqHz3O1hiZ8"
     }
-
+}
 ```
