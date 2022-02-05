@@ -7,13 +7,14 @@ import (
 )
 
 type CampaignTransactionFormatter struct {
-	ID        int       `json:"id"`
-	RewardID  int       `json:"reward_id"`
-	Amount    int       `json:"amount"`
-	CreatedAt time.Time `json:"created_at"`
-	User      user.User
-	Reward    campaign.CampaignReward
-	Campaign  campaign.Campaign
+	ID         int       `json:"id"`
+	RewardID   int       `json:"reward_id"`
+	CampaignID int       `json:"campaign_id"`
+	Amount     int       `json:"amount"`
+	CreatedAt  time.Time `json:"created_at"`
+	User       user.User
+	Reward     campaign.CampaignReward
+	Campaign   campaign.Campaign
 }
 
 func FormatTransaction(transaction Transaction) CampaignTransactionFormatter {
@@ -23,6 +24,7 @@ func FormatTransaction(transaction Transaction) CampaignTransactionFormatter {
 	formatter.CreatedAt = transaction.CreatedAt
 	formatter.User = transaction.User
 	formatter.RewardID = transaction.RewardID
+	formatter.CampaignID = transaction.CampaignID
 	formatter.Reward = transaction.Reward
 	formatter.Campaign = transaction.Campaign
 

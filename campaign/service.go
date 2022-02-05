@@ -308,6 +308,7 @@ func (s *service) SaveCampaignImage(input CreateCampaignImageInput, fileLocation
 }
 
 func (s *service) SaveCampaignReward(input CreateCampaignRewardInput) (CampaignReward, error) {
+
 	campaign, err := s.repository.FindByID(input.CampaignID)
 	if err != nil {
 		return CampaignReward{}, err

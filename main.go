@@ -25,6 +25,7 @@ import (
 )
 
 func main() {
+
 	// refer https://github.com/go-sql-driver/mysql#dsn-data-source-name for details
 	dsn := "root:@tcp(127.0.0.1:3306)/crowdfunding?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -104,6 +105,7 @@ func main() {
 	router.Static("web/images", "./web/assets/images")
 	router.Static("images", "./images")
 	router.Static("attachment", "./attachment")
+	router.Static("proposal", "./proposal")
 	// grouping API
 	api := router.Group("/api/v1")
 	// User Route
