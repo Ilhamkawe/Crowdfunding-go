@@ -16,6 +16,7 @@ Request :
 ```
 Response :
 ```JSON
+{
      "meta": {
         "message": "Berhasil daftar akun",
         "code": 200,
