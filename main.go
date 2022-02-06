@@ -90,7 +90,7 @@ func main() {
 	router.Use(cors.Default())
 	router.Use(cors.New(
 		cors.Config{
-			AllowOrigins: []string{"http://localhost:3000"},
+			AllowOrigins: []string{"http://8.215.44.72"},
 			AllowMethods: []string{"POST", "GET", "PATCH", "DELETE", "HEAD"},
 			AllowHeaders: []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		}))
