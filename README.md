@@ -20,6 +20,11 @@ The tight competition in the selection of research proposals and the decline in 
 | 5 | Prize Claims | The system can sort out users who can claim rewards based on the specified minimum donation amount. | 
 | 6 | Documentation | Users must document the effects of the funding projects that have been carried out. And will be displayed in the success story menu. |
 
+## Run Project
+
+```
+go run main.go
+```
 
 # Register User
 Endpoint : 
