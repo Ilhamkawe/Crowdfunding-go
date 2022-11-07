@@ -9,6 +9,7 @@ The tight competition in the selection of research proposals and the decline in 
 - Gin Gonic 
 - GORM 
 - MySQL
+- Payment Gateway
 
 ## Functional Analysis
 | No. | Functional  | Description |
@@ -26,19 +27,21 @@ The tight competition in the selection of research proposals and the decline in 
 go run main.go
 ```
 
-# Register User
-Endpoint : 
-**/api/v1/users**
-<br>
-Request : 
-```JSON
-    {
-      "name" : "Muhammad Ilham Kusumawardhana", 
-      "occupation" : "Mahasiswa",
-      "email" : "Kawekaweha00@gmail.com", 
-      "password" : "Password123"
-    }
-```
+# Api Specification
+
+### Register User
+- Method : POST
+- Endpoint : /api/v1/users
+
+Request JSON : 
+
+| No. | key  | type |
+| --- | ------------- | ------------- |
+| 1 | name  | string  |
+| 2 | occupation  | string  |
+| 3 | email  | string  |
+| 4 | password  | string  |
+
 Response :
 ```JSON
 {
@@ -48,11 +51,85 @@ Response :
         "status": "sukses"
     },
     "data": {
-        "id": 15,
-        "name": "Muhammad Ilham Kusumawardhana",
+        "id": 1,
+        "name": "nama",
         "occupation": "Mahasiswa",
-        "email": "Kawekaweha00@gmail.com",
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNX0.kFZqgyl1J5dln_PR90B1c-9JL-eTv3HQnqHz3O1hiZ8"
+        "email": "email@gmail.com",
+        "token": "jwttoken"
     }
 }
 ```
+
+### Login User
+- Method : POST
+- Endpoint : /api/v1/session
+
+Request JSON : 
+
+| No. | key  | type |
+| --- | ------------- | ------------- |
+| 1 | email  | string  |
+| 2 | password  | string  |
+
+Response :
+```JSON
+{
+    "meta": {
+        "message": "Login Berhasil",
+        "code": 200,
+        "status": "Berhasil"
+    },
+    "data": {
+        "id": 1,
+        "name": "nama",
+        "occupation": "Mahasiswa",
+        "email": "email@gmail.com",
+        "token": "jwttoken",
+        "image_url": "images/default-user.jpg"
+    }
+}
+```
+
+### Create Campaign
+- Method : POST
+- Endpoint : /api/v1/campaigns
+
+Request FORM : 
+
+| No. | key  | type |
+| --- | ------------- | ------------- |
+| 1 | name  | text  |
+| 2 | short_description  | text  |
+| 2 | description  | text  |
+| 2 | goal_amount  | text  |
+| 2 | cattegory  | text  |
+| 2 | attachemnt  | file  |
+
+Response :
+```JSON
+{
+    "meta": {
+        "message": "Berhasil Buat Campaign",
+        "code": 200,
+        "status": "sukses"
+    },
+    "data": {
+        "id": 1,
+        "user_id": 1,
+        "name": "lorem ipsum",
+        "short_description": "orem Ipsum is simply dummy text of the printing and typesetting industry.",
+        "image_url": "",
+        "goal_amount": 100000,
+        "current_amount": 0,
+        "cattegory": "Finance",
+        "author": "",
+        "slug": "lorem-ipsum-1",
+        "status": "Pending",
+    }
+}
+```
+
+### Other 
+Link : https://www.postman.com/kawekaweha/workspace/sharing-workspace/collection/10751114-01ae799c-62e5-4061-8895-b1a1d80ed975?action=share&creator=10751114
+
+# Screenshoot
