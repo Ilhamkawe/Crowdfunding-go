@@ -133,3 +133,30 @@ Response :
 Link : https://www.postman.com/kawekaweha/workspace/sharing-workspace/collection/10751114-01ae799c-62e5-4061-8895-b1a1d80ed975?action=share&creator=10751114
 
 # Screenshoot
+
+<strong><p>Login<p><strong>
+    
+![](https://github.com/Ilhamkawe/Crowdfunding-go/blob/main/ss_cfund/login.png)
+
+<strong><p>Cattegory<p><strong>
+    
+![](https://github.com/Ilhamkawe/Crowdfunding-go/blob/main/ss_cfund/cattegory.png)
+
+<strong><p>List Campaign<p><strong>
+    
+![](https://github.com/Ilhamkawe/Crowdfunding-go/blob/main/ss_cfund/list_campaign.png)
+
+<strong><p>Detail Campaign<p><strong>
+    
+![](https://github.com/Ilhamkawe/Crowdfunding-go/blob/main/ss_cfund/detail.png)
+
+<strong><p>List Transaction<p><strong>
+    
+![](https://github.com/Ilhamkawe/Crowdfunding-go/blob/main/ss_cfund/list_campaign.png)
+
+<strong><p>Withdraw<p><strong>
+    
+![](https://github.com/Ilhamkawe/Crowdfunding-go/blob/main/ss_cfund/pencairan.png)
+
+## Front-end
+https://github.com/Ilhamkawe/crowdfunding-FE
