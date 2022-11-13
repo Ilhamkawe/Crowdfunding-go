@@ -72,7 +72,7 @@ func (h *campaignHandler) SearchCampaign(c *gin.Context) {
 	var input campaign.SearchCampaignInput
 	err := c.ShouldBindJSON(&input)
 
-	fmt.Println(input)
+	// fmt.Println(input)
 
 	if err != nil {
 		response := helper.APIResponse("Terjadi Kesalahan Input", http.StatusBadRequest, "error", nil)
@@ -155,9 +155,9 @@ func (h *campaignHandler) CreateCampaign(c *gin.Context) {
 	err := c.ShouldBind(&input)
 
 	if err != nil {
+		fmt.Println("disini 1");
 		errors := helper.FormatValidationError(err)
 		errorMessage := gin.H{"errors": errors}
-
 		response := helper.APIResponse("Gagal Buat Campaign", http.StatusUnprocessableEntity, "gagal", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
@@ -169,10 +169,9 @@ func (h *campaignHandler) CreateCampaign(c *gin.Context) {
 
 	//! upload attachment
 	file, err := c.FormFile("attachment")
-	fmt.Println(file.Filename)
+	
 	if err != nil {
 		errorMessage := gin.H{"is_uploaded": false}
-
 		response := helper.APIResponse("Terjadi Kesalahan Saat Mengunggah Lampiran", http.StatusBadRequest, "Gagal", errorMessage)
 		c.JSON(http.StatusBadRequest, response)
 		return
@@ -183,7 +182,6 @@ func (h *campaignHandler) CreateCampaign(c *gin.Context) {
 	err = c.SaveUploadedFile(file, path)
 	if err != nil {
 		errorMessage := gin.H{"is_uploaded": false}
-
 		response := helper.APIResponse("Terjadi Kesalahan Saat Mengunggah Lampiran", http.StatusBadRequest, "Gagal", errorMessage)
 		c.JSON(http.StatusBadRequest, response)
 		return
@@ -324,7 +322,7 @@ func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
 		return
 	}
 
-	response := helper.APIResponse("Berhasil Buat Campaign", http.StatusOK, "sukses", campaign.FormatCampaign(updatedCampaign))
+	response := helper.APIResponse("Berhasil Update Campaign", http.StatusOK, "sukses", campaign.FormatCampaign(updatedCampaign))
 	c.JSON(http.StatusOK, response)
 }
 

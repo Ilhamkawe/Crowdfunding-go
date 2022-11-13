@@ -13,6 +13,7 @@ type Repository interface {
 	Find(campaignName string, campaignCattegory string) ([]Campaign, error)
 	FindAll() ([]Campaign, error)
 	FindAllApproved() ([]Campaign, error)
+	FindByStatus(status string) ([]Campaign, error)
 	FindByUserID(userID int) ([]Campaign, error)
 	FindByID(ID int) (Campaign, error)
 	FindUserCampaign(ID int) (Campaign, error)
@@ -86,6 +87,16 @@ func (r *repository) FindAll() ([]Campaign, error) {
 
 	return campaigns, nil
 }
+func (r *repository) FindByStatus(status string) ([]Campaign, error) {
+	var campaigns []Campaign
+
+	err := r.db.Preload("CampaignImages", "campaign_images.is_primary = 1").Where("status = ?", status).Preload("User").Find(&campaigns).Error
+	if err != nil {
+		return campaigns, err
+	}
+
+	return campaigns, nil
+}
 func (r *repository) FindAllApproved() ([]Campaign, error) {
 	var campaigns []Campaign
 
@@ -144,7 +155,7 @@ func (r *repository) FindByUserID(UserID int) ([]Campaign, error) {
 	var campaigns []Campaign
 
 	// select * from campaign where user_id = ?
-	err := r.db.Where("user_id = ?", UserID).Preload("User").Preload("CampaignImages", "campaign_images.is_primary = 1").Find(&campaigns).Error
+	err := r.db.Where("user_id = ?", UserID).Preload("User").Preload("CampaignImages", "campaign_images.is_primary = 1").Order("created_at desc").Find(&campaigns).Error
 
 	if err != nil {
 		return campaigns, err
@@ -160,7 +171,6 @@ func (r *repository) FindByID(ID int) (Campaign, error) {
 	if err != nil {
 		return campaign, err
 	}
-
 	return campaign, nil
 }
 

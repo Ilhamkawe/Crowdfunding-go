@@ -3,12 +3,15 @@ package transaction
 import (
 	"crowdfunding-TA/campaign"
 	"crowdfunding-TA/payment"
+	reportpdf "crowdfunding-TA/report"
 	"fmt"
 	"math"
 	"strconv"
 
 	// "crowdfunding-TA/payment"
 	"errors"
+
+	"gopkg.in/gomail.v2"
 )
 
 type Service interface {
@@ -23,6 +26,8 @@ type Service interface {
 	FindAllCollectData() ([]CollectCampaign, error)
 	FindCollectDataByCID(id int) (CollectCampaign, error)
 	ChangeCollectStatus(Status string, ID int) (CollectCampaign, error)
+	FindAllPendingCollectData() ([]CollectedCampaignFormatter, error)
+	GPdfPendingCollectData() ([][]string, error)
 }
 
 type service struct {
@@ -68,6 +73,7 @@ func (s *service) GetTransactionsByUserID(UserID int) ([]Transaction, error) {
 }
 
 func (s *service) CreateTransaction(input CreateTransactionInput) (Transaction, error) {
+
 	transaction := Transaction{}
 	transaction.CampaignID = input.CampaignID
 	transaction.Amount = input.Amount
@@ -87,7 +93,9 @@ func (s *service) CreateTransaction(input CreateTransactionInput) (Transaction, 
 	}
 
 	paymentUrl, err := s.paymentService.GetPaymentUrl(paymentTransaction, input.User)
-	fmt.Println(err)
+	
+	fmt.Println(err);
+	
 	if err != nil {
 		return newTransaction, nil
 	}
@@ -115,7 +123,7 @@ func (s *service) ProcessPayment(input TransactionNotificationInput) error {
 
 	if input.PaymentType == "credit_card" && input.TransactionStatus == "capture" && input.FraudStatus == "accept" {
 		transaction.Status = "paid"
-	} else if input.TransactionStatus == "settlemen" {
+	} else if input.TransactionStatus == "settlement" {
 		transaction.Status = "paid"
 	} else if input.TransactionStatus == "deny" || input.TransactionStatus == "expire" || input.TransactionStatus == "cancel" {
 		transaction.Status = "cancelled"
@@ -219,6 +227,24 @@ func (s *service) CollectAmount(input CollectInput) (CollectCampaign, error) {
 		return CollectCampaign{}, err
 	}
 
+	email := gomail.NewMessage()
+	email.SetHeader("From", "muhammad.ilham.kusumawardhana@gmail.com")
+	email.SetHeader("To", campaign.User.Email)
+	email.SetHeader("Subject", "[UTY FundsPoint]Pengajuan Pencairan Penggalangan Dana Ide Kreatif mu")
+
+	if campaign.Status == "Sukses" {
+		email.SetBody("text/html", fmt.Sprintf("<strong><h1>Halo %s</h1></strong><br><h2>Pengajuan Pencairan Pengalangan Dana Mu Dengan Judul %s Sudah Berhasil Diajukan</h2>", campaign.User.Name, campaign.Name))
+	}
+
+	send := gomail.NewDialer("smtp.gmail.com", 587, "muhammad.ilham.kusumawardhana@gmail.com", "viqf ymyn eqae wxua")
+
+	if err := send.DialAndSend(email); err != nil {
+
+		fmt.Println(err)
+		panic(err)
+
+	}
+
 	return newCollect, nil
 
 }
@@ -254,6 +280,17 @@ func (s *service) FindAllCollectData() ([]CollectCampaign, error) {
 	return collectData, nil
 
 }
+func (s *service) FindAllPendingCollectData() ([]CollectedCampaignFormatter, error) {
+
+	collectData, err := s.repository.FindAllPendingCollectData()
+
+	if err != nil {
+		return []CollectedCampaignFormatter{}, err
+	}
+
+	return FormatPDFCollectAbleTrx(collectData), nil
+
+}
 
 func (s *service) ChangeCollectStatus(Status string, ID int) (CollectCampaign, error) {
 	collectData, err := s.repository.FindCollectDataByCID(ID)
@@ -268,5 +305,55 @@ func (s *service) ChangeCollectStatus(Status string, ID int) (CollectCampaign, e
 		return updateCollect, err
 	}
 
+	email := gomail.NewMessage()
+	email.SetHeader("From", "muhammad.ilham.kusumawardhana@gmail.com")
+	email.SetHeader("To", updateCollect.User.Email)
+	email.SetHeader("Subject", "[UTY FundsPoint]Pencairan Penggalangan Dana Ide Kreatif mu")
+
+	if updateCollect.Status == "Sukses" {
+		email.SetBody("text/html", fmt.Sprintf("<strong><h1>Halo %s</h1></strong><br><h2>Pengajuan Pencairan Pengalangan Dana Mu Dengan Judul %s Sudah Berhasil Dicairkan Sebesar Rp %s</h2>", updateCollect.User.Name, updateCollect.Campaign.Name, updateCollect.Campaign.GoalAmountFormatIDR()))
+	}
+
+	send := gomail.NewDialer("smtp.gmail.com", 587, "muhammad.ilham.kusumawardhana@gmail.com", "viqf ymyn eqae wxua")
+
+	if err := send.DialAndSend(email); err != nil {
+
+		fmt.Println(err)
+		panic(err)
+
+	}
+
 	return updateCollect, nil
+}
+
+func (s *service) GPdfPendingCollectData() ([][]string, error) {
+	h := []string{"Campaign", "Nama", "No Rekening", "Bank", "total"}
+
+	c := s.generatePendingStringSlice()
+
+	reportpdf.InitCollectPDF(h, c, "Pengajuan Pencairan Penggalangan Dana")
+	return c, nil
+
+}
+func generatePendingToSlice(c CollectCampaign) []string {
+	slice := []string{}
+	slice = append(slice, c.Campaign.Name)
+	slice = append(slice, c.User.Name)
+	slice = append(slice, c.NoRekening)
+	slice = append(slice, c.Bank)
+	slice = append(slice, c.Campaign.CurrentAmountFormatIDR())
+	return slice
+}
+func (s *service) generatePendingStringSlice() [][]string {
+	collectData, err := s.repository.FindAllPendingCollectData()
+	if err != nil {
+		return [][]string{}
+	}
+
+	slice := [][]string{}
+	for _, a := range collectData {
+		onSlice := generatePendingToSlice(a)
+		slice = append(slice, onSlice)
+	}
+	return slice
 }

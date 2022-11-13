@@ -125,7 +125,7 @@ func (h *userHandler) Login(c *gin.Context) {
 	}
 
 	token, err := h.authService.GenerateToken(loggedInUser.ID)
-
+	
 	if err != nil {
 		response := helper.APIResponse("Gagal Login", http.StatusBadRequest, "gagal", nil)
 		c.JSON(http.StatusBadRequest, response)

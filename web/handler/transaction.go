@@ -50,7 +50,6 @@ func (h *transactionHandler) Collect(c *gin.Context) {
 		return
 	}
 	var Status bool
-	fmt.Println(transactions.Status)
 	if transactions.Status == "Sukses" {
 		Status = true
 	} else {
@@ -79,4 +78,20 @@ func (s *transactionHandler) ChangeCollectStatus(c *gin.Context) {
 	}
 	path := fmt.Sprintf("/collect/%d", id)
 	c.Redirect(http.StatusFound, path)
+}
+
+func (s *transactionHandler) DownloadReport(c *gin.Context) {
+	transactions, err := s.transactionService.FindAllCollectData()
+
+	_, err = s.transactionService.GPdfPendingCollectData()
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{
+			"error":       err,
+			"transaction": transactions,
+		})
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/report/files/init.pdf")
+
 }

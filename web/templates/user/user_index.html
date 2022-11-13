@@ -19,15 +19,15 @@
                   <div class="card-body">
                     <h4 class="card-title">Data Pengguna</h4>
                     <div class="table-responsive">
-                      <table class="table table-hover">
+                      <table id="user" class="table table-hover display " style="width:100%">
                         <thead>
-                          <tr>
-                            <th>Avatar</th>
-                            <th>Nama</th>
-                            <th>Email</th>
-                            <th>Pekerjaan</th>
-                            <th>Aksi</th>
-                          </tr>
+                            <tr>
+                              <th>Avatar</th>
+                              <th>Nama</th>
+                              <th>Email</th>
+                              <th>Pekerjaan</th>
+                              <th>Aksi</th>
+                            </tr>
                         </thead>
                         <tbody>
                           {{ range .users }}
@@ -52,7 +52,8 @@
                           </tr>
                          {{ end }}
                         </tbody>
-                      </table>
+                        
+                    </table>
                     </div>
                   </div>
                 </div>
@@ -62,6 +63,11 @@
     </div>
     <!-- main-panel ends -->
   </div>
+  <script>
+    $(document).ready(function() {
+     $('#user').DataTable();
+    } );
+  </script>
   <!-- page-body-wrapper ends -->
 {{ end }}
 

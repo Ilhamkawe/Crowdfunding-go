@@ -122,3 +122,26 @@ func FormatPaymentTransaction(transaction Transaction) TransactionFormatter {
 
 	return formatter
 }
+
+type CollectedCampaignFormatter struct {
+	Name     string `json:"campaign_name"`
+	UserName string `json:"name"`
+	NoRek    string `json:"no_rekening"`
+	Bank     string `json:"bank"`
+	Total    int    `json:"total"`
+}
+
+func FormatPDFCollectAbleTrx(c []CollectCampaign) []CollectedCampaignFormatter {
+	formatters := []CollectedCampaignFormatter{}
+	formatter := CollectedCampaignFormatter{}
+	for _, data := range c {
+
+		formatter.Name = data.Campaign.Name
+		formatter.UserName = data.User.Name
+		formatter.NoRek = data.NoRekening
+		formatter.Bank = data.Bank
+		formatter.Total = data.Campaign.CurrentAmount
+		formatters = append(formatters, formatter)
+	}
+	return formatters
+}

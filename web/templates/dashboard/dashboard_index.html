@@ -1,0 +1,275 @@
+{{ define "content" }}
+    <div class="container-fluid page-body-wrapper">
+        {{ template "navbar" }}
+        {{ template "theme-setting" }}
+        {{ template "right-sidebar"}}
+        <!-- partial:partials/_sidebar.html -->
+        {{ template "sidebar" }}
+        <!-- partial -->
+        <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="padding">
+               <div class="row">
+                <div class="col-md-4 d-flex">
+                    <div class="card flex" data-sr-id="10" style="visibility: visible; transform: none; opacity: 1; transition: none 0s ease 0s; width: 100%;">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center text-hover-success">
+                                <div class="avatar w-56 m-2 no-shadow gd-success"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trending-up">
+                                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                        <polyline points="17 6 23 6 23 12"></polyline>
+                                    </svg> </div>
+                                <div class="px-4 flex">
+                                    <div>Proyek Pending</div>
+                                    <div class="text-success mt-2">{{ .countpending }}</div>
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex">
+                    <div class="card flex" data-sr-id="10" style="visibility: visible; transform: none; opacity: 1; transition: none 0s ease 0s; width: 100%;">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center text-hover-success">
+                                <div class="avatar w-56 m-2 no-shadow gd-success"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trending-up">
+                                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                        <polyline points="17 6 23 6 23 12"></polyline>
+                                    </svg> </div>
+                                <div class="px-4 flex">
+                                    <div>Proyek Berjalan</div>
+                                    <div class="text-success mt-2">{{ .countsukses }}</div>
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex">
+                    <div class="card flex" data-sr-id="10" style="visibility: visible; transform: none; opacity: 1; transition: none 0s ease 0s; width: 100%;">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center text-hover-success">
+                                <div class="avatar w-56 m-2 no-shadow gd-success"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trending-up">
+                                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                        <polyline points="17 6 23 6 23 12"></polyline>
+                                    </svg> </div>
+                                <div class="px-4 flex">
+                                    <div>Proyek Dicairkan</div>
+                                    <div class="text-success mt-2">{{ .countcair }}</div>
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 d-flex" style="margin-top: 20px;">
+                    <div class="card flex" data-sr-id="10" style="visibility: visible; transform: none; opacity: 1; transition: none 0s ease 0s; width: 100%;">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center text-hover-success">
+                                <div class="avatar w-56 m-2 no-shadow gd-success"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trending-up">
+                                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                        <polyline points="17 6 23 6 23 12"></polyline>
+                                    </svg> </div>
+                                <div class="px-4 flex">
+                                    <div>Pengguna</div>
+                                    <div class="text-success mt-2">{{ .countuser }}</div>
+                                </div> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+               </div>
+            </div>
+            <div class="row" style="margin-top: 20px;">
+                <div class="col-lg-12 grid-margin stretch-card">
+                    <div class="card">
+                      <div class="card-body">
+                        <h4 class="card-title">Data Gampaign</h4>
+                        <div class="table-responsive">
+                          <table id="campaign" class="table table-hover display " style="width:100%">
+                            <thead>
+                                <tr>
+                                  <th>Image</th>
+                                  <th>Nama</th>
+                                  <th>Jumlah Tujuan</th>
+                                  <th>Status</th>
+                                  <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                              {{ range .campaigns }}
+                              <tr>
+                                <td class="py-1">
+                                    {{ if .CampaignImages }}
+                                    <img src="{{ (index .CampaignImages 0).FileName }}" alt="image"/>
+                                    {{ end }}
+                                  </td>
+                                  <td>
+                                      <a href="/campaign/{{ .ID }}/show">{{ .Name }}</a>
+                                  </td>
+                                  <td>
+                                      {{ .GoalAmountFormatIDR }}
+                                  </td>
+                                  <td>
+                                      {{ .Status }}
+                                  </td>
+                                  <td>
+                                    <a href="/campaign/{{ .ID }}/edit" class="btn btn-info btn-rounded btn-icon btn-sm">
+                                        <i class="mdi mdi-grease-pencil"></i>
+                                      </a>
+                                    <a href="/campaign/{{ .ID }}/images" class="btn btn-primary btn-rounded btn-icon btn-sm">
+                                        <i class="mdi mdi-camera-enhance"></i>
+                                      </a>
+                                  </td>
+                              </tr>
+                              {{ end }}
+                            </tbody>
+                            
+                        </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+            <div class="row" style="margin-top: 20px;">
+                <div class="col-lg-6 grid-margin stretch-card">
+                    <div class="card">
+                      <div class="card-body">
+                        <h4 class="card-title">Data Transaksi</h4>
+                        <div class="table-responsive">
+                          
+                          <table id="transaksi" class="table table-hover display " style="width:100%">
+                            <thead>
+                                <tr>
+                                  <th>Nama Kampanye</th>
+                                  <th>Jumlah</th>
+                                  <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                              {{ range .transactions }}
+                              <tr>
+                                <td>{{ .Campaign.Name }}</td>
+                                <td>{{ .AmountFormatIDR }}</td>
+                                <td>{{ .Status }}</td>
+                              </tr>
+                             {{ end }}
+                            </tbody>
+                            
+                        </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <div class="col-lg-6 grid-margin stretch-card">
+                    <div class="card">
+                      <div class="card-body">
+                        <h4 class="card-title">Data Cattegory</h4>
+                        <div class="table-responsive">
+                          
+                            <table id="cattegory" class="table table-hover display " style="width:100%">
+                                <thead>
+                                    <tr>
+                                      <th>ID</th>
+                                      <th>Nama</th>
+                                      <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                  {{ range .cattegory }}
+                                  <tr>
+                                      <td>
+                                          {{ .ID }}
+                                      </td>
+                                      <td>
+                                          {{ .Name }}
+                                      </td>
+                                      <td>
+                                        <button type="button" class="btn btn-danger btn-rounded btn-icon btn-sm" id="open-deletemodal" data-toggle="modal" data-target="#myModal" data-id="{{ .ID }}">
+                                            <i class="mdi mdi-delete"></i>
+                                          </button>
+                                      </td>
+                                  </tr>
+                                  {{ end }}
+                                </tbody>
+                                
+                            </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 grid-margin stretch-card">
+                    <div class="card">
+                      <div class="card-body">
+                        <h4 class="card-title">Data User</h4>
+                        <div class="table-responsive">
+                            <table id="user" class="table table-hover display " style="width:100%">
+                                <thead>
+                                    <tr>
+                                      <th>Avatar</th>
+                                      <th>Nama</th>
+                                      <th>Email</th>
+                                      <th>Pekerjaan</th>
+                                      <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                  {{ range .users }}
+                                  <tr>
+                                    <td class="py-1">
+                                        <img src="{{ .AvatarFileName }}" alt="image"/>
+                                      </td>
+                                    <td>{{ .Name }}</td>
+                                    <td>{{ .Email }}</td>
+                                    <td>{{ .Occupation }}</td>
+                                    <td>
+                                      <a href="/users/{{ .ID }}/edit" class="btn btn-info btn-rounded btn-icon btn-sm">
+                                        <i class="mdi mdi-grease-pencil"></i>
+                                      </a>
+                                      <a href="/users/{{ .ID }}/avatar" class="btn btn-primary btn-rounded btn-icon btn-sm">
+                                        <i class="mdi mdi-camera-enhance"></i>
+                                      </a>
+                                      <button type="button" class="btn btn-danger btn-rounded btn-icon btn-sm">
+                                        <i class="mdi mdi-delete"></i>
+                                      </button>
+                                    </td>
+                                  </tr>
+                                 {{ end }}
+                                </tbody>
+                            </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+        </div>
+        </div>
+        <!-- main-panel ends -->
+    </div>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title" id="myModalLabel">Menghapus Cattegory</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+              Anda Yakin Ingin Mengapus Cattegory ini ?
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+              <a class="btn btn-primary" id="delete">Yakin</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    <script>
+        $(document).ready(function() {
+         $('#campaign').DataTable();
+         $('#user').DataTable();
+         $('#transaksi').DataTable();
+         $('#cattegory').DataTable();
+        } );
+        $(document).on("click","#open-deletemodal", function(){
+      $("#delete").attr("href", "/cattegory/"+$(this).data('id')+"/delete")
+    })
+      </script>
+{{ end }}

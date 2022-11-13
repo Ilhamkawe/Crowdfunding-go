@@ -18,6 +18,7 @@ type Repository interface {
 	CollectAmount(input CollectCampaign) (CollectCampaign, error)
 	FindCollectDataByID(id int) ([]CollectCampaign, error)
 	FindAllCollectData() ([]CollectCampaign, error)
+	FindAllPendingCollectData() ([]CollectCampaign, error)
 	FindCollectDataByCID(id int) (CollectCampaign, error)
 	UpdateCollect(collect CollectCampaign) (CollectCampaign, error)
 }
@@ -159,6 +160,17 @@ func (r *repository) FindCollectDataByCID(id int) (CollectCampaign, error) {
 func (r *repository) FindAllCollectData() ([]CollectCampaign, error) {
 	var collectData []CollectCampaign
 	err := r.db.Preload("Campaign").Preload("User").Order("Status asc").Find(&collectData).Error
+
+	if err != nil {
+		return []CollectCampaign{}, err
+	}
+
+	return collectData, nil
+}
+
+func (r *repository) FindAllPendingCollectData() ([]CollectCampaign, error) {
+	var collectData []CollectCampaign
+	err := r.db.Preload("Campaign").Preload("User").Where("status = ?", "Pending").Find(&collectData).Error
 
 	if err != nil {
 		return []CollectCampaign{}, err

@@ -14,7 +14,7 @@
             <div class="col-12 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">
-                    <h4 class="card-title">Buat Data Kampanye Baru</h4>
+                    <h4 class="card-title">Detail Data Kampanye</h4>
                     <form class="forms-sample" method="POST" action="/campaign/{{ .campaign.ID }}/edit">
                       <div class="form-group">
                         <label for="exampleInputEmail3">Pengguna</label>
@@ -31,7 +31,7 @@
                       <div class="form-group">
                         <label for="exampleTextarea1">Lampiran</label>
                         <br>
-                        <a href="/{{ .campaign.Attachment }}">Download Lampiran</a>
+                        <button type="button" class="btn btn-success me-2" data-toggle="modal" data-target="#myModalPdf">Lihat Lampiran</button>
                       </div>
                       
                       
@@ -42,15 +42,25 @@
                       <div class="form-group">
                         <label for="exampleInputPassword4">Aksi</label><br>
                         {{ if .status}}
-                        <a href="/campaign/{{ .campaign.ID }}/Pending"  class="btn btn-warning me-2">Pending</a>
-                        <a href="/campaign/{{ .campaign.ID }}/Tertolak"  class="btn btn-danger me-2">Tolak</a>
+                        <!-- <a href="/campaign/{{ .campaign.ID }}/Pending"  class="btn btn-warning me-2">Pending</a>
+                        <a href="/campaign/{{ .campaign.ID }}/Tertolak"  class="btn btn-danger me-2">Tolak</a> -->
+                        <button type="button" class="btn btn-warning me-2" data-toggle="modal" data-target="#myModalPending">
+                          Pending
+                        </button>
+                        <button type="button" class="btn btn-danger me-2" data-toggle="modal" data-target="#myModalTolak">
+                          Tolak
+                        </button>
                         {{ else }}
-                        <a href="/campaign/{{ .campaign.ID }}/Berjalan"  class="btn btn-success me-2">Approve</a>
-                        <a href="/campaign/{{ .campaign.ID }}/Tertolak"  class="btn btn-danger me-2">Tolak</a>
+                        <!-- <a href="/campaign/{{ .campaign.ID }}/Berjalan"  class="btn btn-success me-2">Approve</a>
+                        <a href="/campaign/{{ .campaign.ID }}/Tertolak"  class="btn btn-danger me-2">Tolak</a> -->
+                        <button type="button" class="btn btn-success me-2" data-toggle="modal" data-target="#myModalApprove">
+                          Approve
+                        </button>
+                        <button type="button" class="btn btn-danger me-2" data-toggle="modal" data-target="#myModalTolak">
+                          Tolak
+                        </button>
                         {{ end }}
                       </div>
-                      
-                      <button type="submit" class="btn btn-primary me-2">Submit</button>
                       <!-- <button class="btn btn-light">Cancel</button> -->
                     </form>
                   </div>
@@ -61,5 +71,86 @@
     </div>
     <!-- main-panel ends -->
   </div>
+
+<!-- Modal Approve-->
+<div class="modal fade" id="myModalApprove" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="myModalLabel">Perubahan Status</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        Apakah Anda Yakin Mengubah Status Penggalangan Dana Menjadi Approve  ?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+        <a href="/campaign/{{ .campaign.ID }}/Berjalan"  class="btn btn-primary">Yakin</a>
+      </div>
+    </div>
+  </div>
+</div>
   <!-- page-body-wrapper ends -->
+<!-- Modal Pending-->
+<div class="modal fade" id="myModalPending" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="myModalLabel">Perubahan Status</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        Apakah Anda Yakin Mengubah Status Penggalangan Dana Menjadi Pending  ?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+        <a href="/campaign/{{ .campaign.ID }}/Pending"  class="btn btn-primary">Yakin</a>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- page-body-wrapper ends -->
+<!-- Modal Tolak -->
+<div class="modal fade" id="myModalTolak" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="myModalLabel">Perubahan Status</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        Apakah Anda Yakin Mengubah Status Penggalangan Dana Menjadi Ditolak  ?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+        <a href="/campaign/{{ .campaign.ID }}/Tertolak"  class="btn btn-primary">Yakin</a>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- page-body-wrapper ends -->
+  <!-- modal pdf -->
+  <div class="modal fade" id="myModalPdf" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel">Lampiran</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body" id="pdf-modal">
+          <object data="/{{ .campaign.Attachment }}" width="100%" height="500">
+            <embed src="/{{ .campaign.Attachment }}" type="application/pdf">
+          </object>
+        </div>
+        <div class="modal-footer">
+         
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    $('#myModal').on('shown.bs.modal', function () {
+      $('#myInput').focus()
+    })
+  </script>
 {{ end }}

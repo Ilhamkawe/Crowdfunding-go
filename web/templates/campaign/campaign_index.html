@@ -19,15 +19,16 @@
                   <div class="card-body">
                     <h4 class="card-title">Data Gampaign</h4>
                     <div class="table-responsive">
-                      <table class="table table-hover">
+                      
+                      <table id="campaign" class="table table-hover display " style="width:100%">
                         <thead>
-                          <tr>
-                            <th>Image</th>
-                            <th>Nama</th>
-                            <th>Jumlah Tujuan</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                          </tr>
+                            <tr>
+                              <th>Image</th>
+                              <th>Nama</th>
+                              <th>Jumlah Tujuan</th>
+                              <th>Status</th>
+                              <th>Aksi</th>
+                            </tr>
                         </thead>
                         <tbody>
                           {{ range .campaigns }}
@@ -57,7 +58,8 @@
                           </tr>
                           {{ end }}
                         </tbody>
-                      </table>
+                        
+                    </table>
                     </div>
                   </div>
                 </div>
@@ -67,5 +69,10 @@
     </div>
     <!-- main-panel ends -->
   </div>
+  <script>
+    $(document).ready(function() {
+     $('#campaign').DataTable();
+    } );
+  </script>
   <!-- page-body-wrapper ends -->
 {{ end }}

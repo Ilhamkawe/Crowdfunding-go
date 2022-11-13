@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/gosimple/slug"
+	"gopkg.in/gomail.v2"
 )
 
 type Service interface {
@@ -15,6 +16,7 @@ type Service interface {
 	GetCampaignByID(input GetCampaignDetailInput) (Campaign, error)
 	GetUserCampaignByID(inputID GetCampaignDetailInput, inputUser GetUserCampaign) (Campaign, error)
 	GetAllCampaign() ([]Campaign, error)
+	GetCampaignByStatus(status string) ([]Campaign, error)
 	GetCampaignByIDWoStatus(id int) (Campaign, error)
 	CreateCampaign(input CreateCampaignInput) (Campaign, error)
 	UpdateCampaign(inputID GetCampaignDetailInput, inputData UpdateCampaignInput) (Campaign, error)
@@ -58,6 +60,17 @@ func (s *service) GetRewards(input GetCampaignDetailInput) ([]CampaignReward, er
 	}
 
 	return rewards, err
+}
+
+func (s *service) GetCampaignByStatus(status string) ([]Campaign, error) {
+	var campaigns []Campaign
+
+	campaigns, err := s.repository.FindByStatus(status)
+	if err != nil {
+		return campaigns, err
+	}
+
+	return campaigns, err
 }
 
 func (s *service) Limit(num int) ([]Campaign, error) {
@@ -195,6 +208,22 @@ func (s *service) CreateCampaign(input CreateCampaignInput) (Campaign, error) {
 		return newCampaign, err
 	}
 
+	// email := gomail.NewMessage()
+	// email.SetHeader("From", "muhammad.ilham.kusumawardhana@gmail.com")
+	// email.SetHeader("To", newCampaign.User.Email)
+	// email.SetHeader("Subject", "[UTY FundsPoint] Pengajuan Penggalangan Dana Ide Kreatif mu")
+
+	// email.SetBody("text/html", fmt.Sprintf("<strong><h1>Halo %s</h1></strong><br><h2>Pengajuan Pengalangan Dana Mu Dengan Judul %s Sudah Kami Terima</h2><br>Silahkan tunggu beberapa waktu sampai projekmu di verifikasi, kami akan mengirimkan email pemberitahuan secepatnya", campaign.User.Name, campaign.Name))
+
+	// send := gomail.NewDialer("smtp.gmail.com", 587, "muhammad.ilham.kusumawardhana@gmail.com", "viqf ymyn eqae wxua")
+
+	// if err := send.DialAndSend(email); err != nil {
+
+	// 	fmt.Println(err)
+	// 	panic(err)
+
+	// }
+
 	return newCampaign, err
 }
 
@@ -233,15 +262,32 @@ func (s *service) ChangeStatus(Status string, ID int) (Campaign, error) {
 
 	campaign.Status = Status
 
-	fmt.Println(campaign)
-
 	updateCampaign, err := s.repository.Update(campaign)
 	if err != nil {
 		return updateCampaign, err
 	}
 
-	return updateCampaign, nil
+	email := gomail.NewMessage()
+	email.SetHeader("From", "muhammad.ilham.kusumawardhana@gmail.com")
+	email.SetHeader("To", campaign.User.Email)
+	email.SetHeader("Subject", "[UTY FundsPoint] Penggalangan Dana Ide Kreatif mu")
 
+	if campaign.Status == "Berjalan" {
+		email.SetBody("text/html", fmt.Sprintf("<strong><h1>Halo %s</h1></strong><br><h2>Pengalangan Dana Mu Dengan Judul %s Sudah Di Verifikasi</h2><br>Silahkan lengkapi data penggalangan dana anda semenarik mungkin", campaign.User.Name, campaign.Name))
+	} else if campaign.Status == "Ditolak" {
+		email.SetBody("text/html", fmt.Sprintf("<strong><h1>Halo %s</h1></strong><br><h2>Mohon Maaf, Pengalangan Dana Mu Dengan Judul %s Kami Tolak</h2><br>Silahkan Ajukan Penggalangan Dana Kembali Dengan Kelengkapanya", campaign.User.Name, campaign.Name))
+	}
+
+	send := gomail.NewDialer("smtp.gmail.com", 587, "muhammad.ilham.kusumawardhana@gmail.com", "viqf ymyn eqae wxua")
+
+	if err := send.DialAndSend(email); err != nil {
+
+		fmt.Println(err)
+		panic(err)
+
+	}
+
+	return updateCampaign, nil
 }
 
 func (s *service) UpdateAttachment(input UpdateAttachmentInput) (Campaign, error) {

@@ -69,6 +69,7 @@ func main() {
 	campaignWebHandler := webHandler.NewCampaignHandler(campaignService, userService)
 	transactionWebHandler := webHandler.NewTransactionHandler(transactionService)
 	sessionWebHandler := webHandler.NewSessionHandler(userService)
+	dashboardWebHandler := webHandler.NewDashboardHandler(campaignService, userService, transactionService)
 	// !=================================================================================
 
 	// * Task Scheduler
@@ -83,14 +84,15 @@ func main() {
 
 	go scheduler.Start()
 
-	// ? test
+	// !================================================================================
 
+	fmt.Println(transactionService.GPdfPendingCollectData())
 	// membuat Router
 	router := gin.Default()
 	router.Use(cors.Default())
 	router.Use(cors.New(
 		cors.Config{
-			AllowOrigins: []string{"http://8.215.44.72"},
+			AllowOrigins: []string{"http://localhost:3000/"},
 			AllowMethods: []string{"POST", "GET", "PATCH", "DELETE", "HEAD"},
 			AllowHeaders: []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		}))
@@ -106,6 +108,7 @@ func main() {
 	router.Static("images", "./images")
 	router.Static("attachment", "./attachment")
 	router.Static("proposal", "./proposal")
+	router.Static("report", "./report")
 	// grouping API
 	api := router.Group("/api/v1")
 	// User Route
@@ -152,6 +155,7 @@ func main() {
 	api.GET("/collect/:id", middleware.AuthMiddleware(authService, userService), transactionHandler.FindCollectData)
 
 	// CMS Route
+	router.GET("/", middleware.AdminMiddleware(), dashboardWebHandler.Index)
 	router.GET("/users", middleware.AdminMiddleware(), userWebHandler.Index)
 	router.GET("/users/new", middleware.AdminMiddleware(), userWebHandler.New)
 	router.POST("/users/new", middleware.AdminMiddleware(), userWebHandler.Create)
@@ -173,11 +177,12 @@ func main() {
 	router.GET("/cattegory/:id/delete", middleware.AdminMiddleware(), campaignWebHandler.DeleteCattegory)
 	router.GET("/transactions", middleware.AdminMiddleware(), transactionWebHandler.Index)
 	router.GET("/collect", middleware.AdminMiddleware(), transactionWebHandler.CollectList)
+	router.GET("/collect/report", middleware.AdminMiddleware(), transactionWebHandler.DownloadReport)
 	router.GET("/collect/:id", middleware.AdminMiddleware(), transactionWebHandler.Collect)
 	router.GET("/collect/:id/:status", middleware.AdminMiddleware(), transactionWebHandler.ChangeCollectStatus)
 	router.GET("/login", sessionWebHandler.Index)
 	router.POST("/login", sessionWebHandler.Login)
-	router.GET("/logout", sessionWebHandler.Logout)
+	router.GET("/logout", middleware.AdminMiddleware(), sessionWebHandler.Logout)
 	router.Run()
 
 }
@@ -213,9 +218,3 @@ func loadTemplates(templatesDir string) multitemplate.Renderer {
 // ambil user_id
 // ambil user dari db berdasarkan id lewat service
 // set context isinya user
-
-func TestScheduler() {
-
-	fmt.Println("Berhasil Menggunakan Cron Job")
-
-}

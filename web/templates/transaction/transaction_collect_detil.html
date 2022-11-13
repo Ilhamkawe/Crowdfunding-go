@@ -14,7 +14,7 @@
             <div class="col-12 grid-margin stretch-card">
                 <div class="card">
                   <div class="card-body">
-                    <h4 class="card-title">Buat Data Kampanye Baru</h4>
+                    <h4 class="card-title">Detail Pengajuan Pencairan Dana ({{ if .status }} Sukses {{ else }} Pending {{ end }})</h4>
                     <form class="forms-sample" method="POST" action="/campaign/{{ .ampaign.ID }}/edit">
                       <div class="form-group">
                         <label for="exampleInputEmail3">Nama User</label>
@@ -40,9 +40,9 @@
                       <div class="form-group">
                         <label for="exampleInputPassword4">Aksi</label><br>
                         {{ if .status}}
-                        <a href="/collect/{{ .transactions.ID }}/Pending"  class="btn btn-warning me-2">Pending</a>
+                        <button type="button"  class="btn btn-warning me-2" data-toggle="modal" data-target="#myModalPending">Pending</button>
                         {{ else }}
-                        <a href="/collect/{{ .transactions.ID }}/Sukses"  class="btn btn-success me-2">Sukses</a>
+                        <button type="button"  class="btn btn-success me-2" data-toggle="modal" data-target="#myModalSukses">Sukses</button>
                         {{ end }}
                       </div>
                     </form>
@@ -55,4 +55,39 @@
     <!-- main-panel ends -->
   </div>
   <!-- page-body-wrapper ends -->
+  <div class="modal fade" id="myModalSukses" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel">Mengubah Status Pencairan</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          Anda Yakin Ingin Mengubah Status Pencairan Untuk Penggalangan Dana ?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+          <a href="/collect/{{ .transactions.ID }}/Sukses" class="btn btn-primary">Yakin</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- =============== -->
+  <div class="modal fade" id="myModalPending" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="myModalLabel">Mengubah Status Pencairan</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+        <div class="modal-body">
+          Anda Yakin Ingin Mengubah Status Pencairan Untuk Penggalangan Dana ?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+          <a href="/collect/{{ .transactions.ID }}/Pending" class="btn btn-primary">Yakin</a>
+        </div>
+      </div>
+    </div>
+  </div>
 {{ end }}
